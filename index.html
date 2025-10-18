@@ -104,7 +104,8 @@
             margin-bottom: 0;
         }
 
-        input[type="number"] {
+        input[type="number"],
+        input[type="text"] {
             width: 100%;
             padding: 12px;
             font-size: 16px;
@@ -114,7 +115,8 @@
             color: var(--tg-theme-text-color, #000);
         }
 
-        input[type="number"]:focus {
+        input[type="number"]:focus,
+        input[type="text"]:focus {
             outline: none;
             border-color: var(--tg-theme-button-color, #0088cc);
         }
@@ -205,6 +207,126 @@
         .strategy-preview strong {
             color: var(--tg-theme-button-color, #0088cc);
         }
+
+        .toggle-button {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border: 2px solid var(--tg-theme-button-color, #0088cc);
+            border-radius: 10px;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-button:active {
+            transform: scale(0.98);
+        }
+
+        .toggle-button.online {
+            background-color: var(--tg-theme-button-color, #0088cc);
+            color: white;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #6b7280;
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.online {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .online-data {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--tg-theme-hint-color, #ddd);
+        }
+
+        .online-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .online-item:last-child {
+            border-bottom: none;
+        }
+
+        .online-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .online-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #0088cc);
+        }
+
+        .coin-section {
+            text-align: center;
+            padding: 24px 16px;
+        }
+
+        .coin-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 16px;
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            border: 2px solid var(--tg-theme-button-color, #0088cc);
+            border-radius: 12px;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            text-transform: uppercase;
+        }
+
+        .coin-input:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #0088cc);
+            box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+        }
+
+        .coin-input::placeholder {
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .positions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .positions-grid {
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -214,38 +336,92 @@
             <p>Настройка стратегии</p>
         </div>
 
-        <!-- Выбор бирж -->
-        <div class="section">
-            <div class="section-title">Биржи</div>
-            
-            <div class="select-group">
-                <label>🔴 Шорт позиция</label>
-                <select id="shortExchange">
-                    <option value="">Выберите биржу</option>
-                    <option value="binance">Binance</option>
-                    <option value="bybit">Bybit</option>
-                    <option value="okx">OKX</option>
-                    <option value="gateio">Gate.io</option>
-                    <option value="kucoin">KuCoin</option>
-                    <option value="huobi">Huobi</option>
-                    <option value="mexc">MEXC</option>
-                    <option value="bitget">Bitget</option>
-                </select>
+        <!-- Выбор монеты -->
+        <div class="section coin-section">
+            <div class="input-group">
+                <input type="text" id="coinSymbol" placeholder="BTC" class="coin-input">
+            </div>
+        </div>
+
+        <!-- Позиции в два столбца -->
+        <div class="positions-grid">
+            <!-- Шорт позиция -->
+            <div class="section">
+                <div class="section-title">🔴 Шорт</div>
+                
+                <div class="select-group">
+                    <label>Биржа</label>
+                    <select id="shortExchange">
+                        <option value="">Выберите</option>
+                        <option value="binance">Binance</option>
+                        <option value="bybit">Bybit</option>
+                        <option value="okx">OKX</option>
+                        <option value="gateio">Gate.io</option>
+                        <option value="kucoin">KuCoin</option>
+                        <option value="huobi">Huobi</option>
+                        <option value="mexc">MEXC</option>
+                        <option value="bitget">Bitget</option>
+                    </select>
+                </div>
+
+                <div class="select-group">
+                    <label>Тип</label>
+                    <select id="shortType">
+                        <option value="futures">Фьючерс</option>
+                        <option value="spot">Спот</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="select-group">
-                <label>🟢 Лонг позиция</label>
-                <select id="longExchange">
-                    <option value="">Выберите биржу</option>
-                    <option value="binance">Binance</option>
-                    <option value="bybit">Bybit</option>
-                    <option value="okx">OKX</option>
-                    <option value="gateio">Gate.io</option>
-                    <option value="kucoin">KuCoin</option>
-                    <option value="huobi">Huobi</option>
-                    <option value="mexc">MEXC</option>
-                    <option value="bitget">Bitget</option>
-                </select>
+            <!-- Лонг позиция -->
+            <div class="section">
+                <div class="section-title">🟢 Лонг</div>
+                
+                <div class="select-group">
+                    <label>Биржа</label>
+                    <select id="longExchange">
+                        <option value="">Выберите</option>
+                        <option value="binance">Binance</option>
+                        <option value="bybit">Bybit</option>
+                        <option value="okx">OKX</option>
+                        <option value="gateio">Gate.io</option>
+                        <option value="kucoin">KuCoin</option>
+                        <option value="huobi">Huobi</option>
+                        <option value="mexc">MEXC</option>
+                        <option value="bitget">Bitget</option>
+                    </select>
+                </div>
+
+                <div class="select-group">
+                    <label>Тип</label>
+                    <select id="longType">
+                        <option value="futures">Фьючерс</option>
+                        <option value="spot">Спот</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Онлайн режим -->
+        <div class="section">
+            <button id="toggleOnline" class="toggle-button">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="toggleText">Online спред + фандинг</span>
+            </button>
+            
+            <div id="onlineData" class="online-data" style="display: none;">
+                <div class="online-item">
+                    <div class="online-label">📈 Спред входа</div>
+                    <div class="online-value" id="liveEntrySpread">--%</div>
+                </div>
+                <div class="online-item">
+                    <div class="online-label">📉 Спред выхода</div>
+                    <div class="online-value" id="liveExitSpread">--%</div>
+                </div>
+                <div class="online-item">
+                    <div class="online-label">💰 Фандинг</div>
+                    <div class="online-value" id="liveFunding">--%</div>
+                </div>
             </div>
         </div>
 
@@ -286,17 +462,34 @@
 
     <script>
         // Инициализация Telegram Web App
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
 
         // Элементы
+        const coinSymbol = document.getElementById('coinSymbol');
         const shortExchange = document.getElementById('shortExchange');
+        const shortType = document.getElementById('shortType');
         const longExchange = document.getElementById('longExchange');
+        const longType = document.getElementById('longType');
         const entrySpread = document.getElementById('entrySpread');
         const exitSpread = document.getElementById('exitSpread');
         const profitValue = document.getElementById('profitValue');
         const strategyPreview = document.getElementById('strategyPreview');
+        
+        // Онлайн режим
+        const toggleOnline = document.getElementById('toggleOnline');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const toggleText = document.getElementById('toggleText');
+        const onlineData = document.getElementById('onlineData');
+        const liveEntrySpread = document.getElementById('liveEntrySpread');
+        const liveExitSpread = document.getElementById('liveExitSpread');
+        const liveFunding = document.getElementById('liveFunding');
+        
+        let isOnline = false;
+        let updateInterval = null;
 
         // Функция расчета прибыли
         function calculateProfit() {
@@ -314,6 +507,9 @@
         function updateStrategyPreview() {
             const short = shortExchange.value;
             const long = longExchange.value;
+            const coin = coinSymbol.value.toUpperCase() || 'МОНЕТА';
+            const sType = shortType.options[shortType.selectedIndex].text;
+            const lType = longType.options[longType.selectedIndex].text;
             const entry = parseFloat(entrySpread.value) || 0;
             const exit = parseFloat(exitSpread.value) || 0;
             
@@ -328,8 +524,8 @@
             strategyPreview.innerHTML = `
                 <strong>Вход в позицию:</strong><br>
                 Когда спред достигнет <strong>${entry}%</strong>:<br>
-                • Открыть SHORT на <strong>${shortName}</strong><br>
-                • Открыть LONG на <strong>${longName}</strong><br>
+                • Открыть SHORT на <strong>${shortName}</strong> (${coin}/${sType})<br>
+                • Открыть LONG на <strong>${longName}</strong> (${coin}/${lType})<br>
                 <br>
                 <strong>Выход из позиции:</strong><br>
                 Когда спред сузится до <strong>${exit}%</strong>:<br>
@@ -338,9 +534,248 @@
             `;
         }
 
+        // Функция переключения онлайн режима
+        function toggleOnlineMode() {
+            isOnline = !isOnline;
+            
+            if (isOnline) {
+                toggleOnline.classList.add('online');
+                statusIndicator.classList.add('online');
+                toggleText.textContent = 'Online спред + фандинг';
+                onlineData.style.display = 'block';
+                startUpdating();
+            } else {
+                toggleOnline.classList.remove('online');
+                statusIndicator.classList.remove('online');
+                toggleText.textContent = 'Online спред + фандинг';
+                onlineData.style.display = 'none';
+                stopUpdating();
+            }
+        }
+
+        // Функция запуска обновления данных
+        function startUpdating() {
+            updateLiveData(); // Первое обновление сразу
+            updateInterval = setInterval(updateLiveData, 1000);
+        }
+
+        // Функция остановки обновления данных
+        function stopUpdating() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+
+        // Функция обновления онлайн данных (пока симуляция)
+        function updateLiveData() {
+            // Проверяем, что все данные заполнены
+            const coin = coinSymbol.value.toUpperCase();
+            const short = shortExchange.value;
+            const long = longExchange.value;
+            const sType = shortType.value;
+            const lType = longType.value;
+            
+            if (!coin || !short || !long) {
+                liveEntrySpread.textContent = '--';
+                liveExitSpread.textContent = '--';
+                liveFunding.textContent = '--';
+                return;
+            }
+            
+            // Получаем данные с бирж
+            fetchSpreadData(coin, short, sType, long, lType);
+        }
+
+        // Функция получения цены с биржи
+        async function getPrice(exchange, coin, type) {
+            try {
+                const symbol = coin + 'USDT';
+                let url = '';
+                
+                switch(exchange) {
+                    case 'binance':
+                        if (type === 'futures') {
+                            url = `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`;
+                        } else {
+                            url = `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`;
+                        }
+                        break;
+                    case 'bybit':
+                        const category = type === 'futures' ? 'linear' : 'spot';
+                        url = `https://api.bybit.com/v5/market/tickers?category=${category}&symbol=${symbol}`;
+                        break;
+                    case 'okx':
+                        const instType = type === 'futures' ? 'SWAP' : 'SPOT';
+                        const instId = type === 'futures' ? `${coin}-USDT-SWAP` : `${coin}-USDT`;
+                        url = `https://www.okx.com/api/v5/market/ticker?instId=${instId}`;
+                        break;
+                    case 'gateio':
+                        const settle = type === 'futures' ? 'usdt' : '';
+                        if (type === 'futures') {
+                            url = `https://api.gateio.ws/api/v4/futures/usdt/contracts/${symbol}`;
+                        } else {
+                            url = `https://api.gateio.ws/api/v4/spot/tickers?currency_pair=${symbol}`;
+                        }
+                        break;
+                    case 'kucoin':
+                        if (type === 'futures') {
+                            url = `https://api-futures.kucoin.com/api/v1/ticker?symbol=${symbol}`;
+                        } else {
+                            url = `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${symbol}`;
+                        }
+                        break;
+                    case 'mexc':
+                        if (type === 'futures') {
+                            url = `https://contract.mexc.com/api/v1/contract/ticker?symbol=${symbol}`;
+                        } else {
+                            url = `https://api.mexc.com/api/v3/ticker/price?symbol=${symbol}`;
+                        }
+                        break;
+                    case 'bitget':
+                        const productType = type === 'futures' ? 'umcbl' : 'spot';
+                        const sym = type === 'futures' ? `${coin}USDT_UMCBL` : `${symbol}`;
+                        url = `https://api.bitget.com/api/mix/v1/market/ticker?symbol=${sym}&productType=${productType}`;
+                        break;
+                    default:
+                        return null;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Парсим цену в зависимости от биржи
+                let price = null;
+                switch(exchange) {
+                    case 'binance':
+                        price = parseFloat(data.price);
+                        break;
+                    case 'bybit':
+                        price = parseFloat(data.result?.list?.[0]?.lastPrice);
+                        break;
+                    case 'okx':
+                        price = parseFloat(data.data?.[0]?.last);
+                        break;
+                    case 'gateio':
+                        if (type === 'futures') {
+                            price = parseFloat(data.last_price);
+                        } else {
+                            price = parseFloat(data[0]?.last);
+                        }
+                        break;
+                    case 'kucoin':
+                        price = parseFloat(data.data?.price);
+                        break;
+                    case 'mexc':
+                        if (type === 'futures') {
+                            price = parseFloat(data.data?.lastPrice);
+                        } else {
+                            price = parseFloat(data.price);
+                        }
+                        break;
+                    case 'bitget':
+                        price = parseFloat(data.data?.last);
+                        break;
+                }
+                
+                return price;
+            } catch (error) {
+                console.error(`Ошибка получения цены с ${exchange}:`, error);
+                return null;
+            }
+        }
+
+        // Функция получения фандинга
+        async function getFunding(exchange, coin) {
+            try {
+                const symbol = coin + 'USDT';
+                let url = '';
+                
+                switch(exchange) {
+                    case 'binance':
+                        url = `https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`;
+                        break;
+                    case 'bybit':
+                        url = `https://api.bybit.com/v5/market/tickers?category=linear&symbol=${symbol}`;
+                        break;
+                    case 'okx':
+                        url = `https://www.okx.com/api/v5/public/funding-rate?instId=${coin}-USDT-SWAP`;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                let fundingRate = 0;
+                switch(exchange) {
+                    case 'binance':
+                        fundingRate = parseFloat(data.lastFundingRate) * 100;
+                        break;
+                    case 'bybit':
+                        fundingRate = parseFloat(data.result?.list?.[0]?.fundingRate) * 100;
+                        break;
+                    case 'okx':
+                        fundingRate = parseFloat(data.data?.[0]?.fundingRate) * 100;
+                        break;
+                }
+                
+                return fundingRate;
+            } catch (error) {
+                console.error(`Ошибка получения фандинга с ${exchange}:`, error);
+                return 0;
+            }
+        }
+
+        // Функция расчета спреда
+        async function fetchSpreadData(coin, shortEx, shortT, longEx, longT) {
+            try {
+                // Получаем цены
+                const [shortPrice, longPrice] = await Promise.all([
+                    getPrice(shortEx, coin, shortT),
+                    getPrice(longEx, coin, longT)
+                ]);
+                
+                if (!shortPrice || !longPrice) {
+                    liveEntrySpread.textContent = 'Ошибка';
+                    liveExitSpread.textContent = 'Ошибка';
+                    return;
+                }
+                
+                // Рассчитываем спред в процентах
+                const spread = ((shortPrice - longPrice) / longPrice * 100);
+                
+                // Спред входа (текущий спред)
+                liveEntrySpread.textContent = spread.toFixed(2) + '%';
+                
+                // Спред выхода (симуляция - можно добавить логику)
+                const exitSpreadValue = (spread * 0.3).toFixed(2);
+                liveExitSpread.textContent = exitSpreadValue + '%';
+                
+                // Получаем фандинг для SHORT позиции (если фьючерс)
+                let funding = 0;
+                if (shortT === 'futures') {
+                    funding = await getFunding(shortEx, coin);
+                }
+                
+                liveFunding.textContent = funding.toFixed(4) + '%';
+                
+            } catch (error) {
+                console.error('Ошибка получения данных:', error);
+                liveEntrySpread.textContent = 'Ошибка';
+                liveExitSpread.textContent = 'Ошибка';
+                liveFunding.textContent = 'Ошибка';
+            }
+        }
+
         // Слушатели событий
+        toggleOnline.addEventListener('click', toggleOnlineMode);
+        coinSymbol.addEventListener('input', calculateProfit);
         shortExchange.addEventListener('change', calculateProfit);
+        shortType.addEventListener('change', calculateProfit);
         longExchange.addEventListener('change', calculateProfit);
+        longType.addEventListener('change', calculateProfit);
         entrySpread.addEventListener('input', calculateProfit);
         exitSpread.addEventListener('input', calculateProfit);
 
@@ -348,20 +783,25 @@
         calculateProfit();
 
         // Настройка главной кнопки Telegram
-        tg.MainButton.text = "Сохранить стратегию";
-        tg.MainButton.show();
-        tg.MainButton.onClick(() => {
-            const data = {
-                shortExchange: shortExchange.value,
-                longExchange: longExchange.value,
-                entrySpread: parseFloat(entrySpread.value),
-                exitSpread: parseFloat(exitSpread.value),
-                expectedProfit: (parseFloat(entrySpread.value) - parseFloat(exitSpread.value)).toFixed(2)
-            };
-            
-            // Отправка данных боту
-            tg.sendData(JSON.stringify(data));
-        });
+        if (tg) {
+            tg.MainButton.text = "Сохранить стратегию";
+            tg.MainButton.show();
+            tg.MainButton.onClick(() => {
+                const data = {
+                    coin: coinSymbol.value.toUpperCase(),
+                    shortExchange: shortExchange.value,
+                    shortType: shortType.value,
+                    longExchange: longExchange.value,
+                    longType: longType.value,
+                    entrySpread: parseFloat(entrySpread.value),
+                    exitSpread: parseFloat(exitSpread.value),
+                    expectedProfit: (parseFloat(entrySpread.value) - parseFloat(exitSpread.value)).toFixed(2)
+                };
+                
+                // Отправка данных боту
+                tg.sendData(JSON.stringify(data));
+            });
+        }
     </script>
 </body>
 </html>
