@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Крипто Арбитраж</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         * {
             margin: 0;
@@ -327,6 +328,14 @@
                 gap: 8px;
             }
         }
+
+        #spreadChart {
+            width: 100%;
+            height: 300px;
+            margin-top: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -354,13 +363,21 @@
                     <select id="shortExchange">
                         <option value="">Выберите</option>
                         <option value="binance">Binance</option>
-                        <option value="bybit">Bybit</option>
-                        <option value="okx">OKX</option>
-                        <option value="gateio">Gate.io</option>
-                        <option value="kucoin">KuCoin</option>
-                        <option value="huobi">Huobi</option>
-                        <option value="mexc">MEXC</option>
+                        <option value="bingx">BingX</option>
                         <option value="bitget">Bitget</option>
+                        <option value="bitmart">BitMart</option>
+                        <option value="bitmex">Bitmex</option>
+                        <option value="bybit">Bybit</option>
+                        <option value="coinex">CoinEx</option>
+                        <option value="gateio">Gate.io</option>
+                        <option value="htx">HTX</option>
+                        <option value="hyperliquid">HyperLiquid</option>
+                        <option value="kucoin">KuCoin</option>
+                        <option value="lbank">LBank</option>
+                        <option value="mexc">MEXC</option>
+                        <option value="okx">OKX</option>
+                        <option value="ourbit">Ourbit</option>
+                        <option value="xt">XT</option>
                     </select>
                 </div>
 
@@ -382,13 +399,21 @@
                     <select id="longExchange">
                         <option value="">Выберите</option>
                         <option value="binance">Binance</option>
-                        <option value="bybit">Bybit</option>
-                        <option value="okx">OKX</option>
-                        <option value="gateio">Gate.io</option>
-                        <option value="kucoin">KuCoin</option>
-                        <option value="huobi">Huobi</option>
-                        <option value="mexc">MEXC</option>
+                        <option value="bingx">BingX</option>
                         <option value="bitget">Bitget</option>
+                        <option value="bitmart">BitMart</option>
+                        <option value="bitmex">Bitmex</option>
+                        <option value="bybit">Bybit</option>
+                        <option value="coinex">CoinEx</option>
+                        <option value="gateio">Gate.io</option>
+                        <option value="htx">HTX</option>
+                        <option value="hyperliquid">HyperLiquid</option>
+                        <option value="kucoin">KuCoin</option>
+                        <option value="lbank">LBank</option>
+                        <option value="mexc">MEXC</option>
+                        <option value="okx">OKX</option>
+                        <option value="ourbit">Ourbit</option>
+                        <option value="xt">XT</option>
                     </select>
                 </div>
 
@@ -422,6 +447,9 @@
                     <div class="online-label">💰 Фандинг</div>
                     <div class="online-value" id="liveFunding">--%</div>
                 </div>
+                
+                <!-- График истории спреда -->
+                <div id="spreadChart"></div>
             </div>
         </div>
 
@@ -490,6 +518,15 @@
         
         let isOnline = false;
         let updateInterval = null;
+        
+        // График
+        let chart = null;
+        let entrySpreadSeries = null;
+        let exitSpreadSeries = null;
+        let entryLevelLine = null;
+        let exitLevelLine = null;
+        let lastUserInteraction = Date.now();
+        let autoScroll = true;
 
         // Функция расчета прибыли
         function calculateProfit() {
@@ -543,7 +580,13 @@
                 statusIndicator.classList.add('online');
                 toggleText.textContent = 'Online спред + фандинг';
                 onlineData.style.display = 'block';
-                startUpdating();
+                autoScroll = true; // Включаем автоскролл
+                
+                // Небольшая задержка чтобы контейнер успел отрисоваться
+                setTimeout(() => {
+                    initChart();
+                    startUpdating();
+                }, 100);
             } else {
                 toggleOnline.classList.remove('online');
                 statusIndicator.classList.remove('online');
@@ -553,10 +596,281 @@
             }
         }
 
+        // Инициализация графика
+        function initChart() {
+            if (chart) return; // Уже создан
+            
+            // Проверяем что библиотека загрузилась
+            if (typeof LightweightCharts === 'undefined') {
+                console.error('TradingView библиотека не загружена');
+                return;
+            }
+            
+            const chartContainer = document.getElementById('spreadChart');
+            
+            try {
+                chart = LightweightCharts.createChart(chartContainer, {
+                    width: chartContainer.clientWidth,
+                    height: 300,
+                    layout: {
+                        background: { color: '#1e293b' },
+                        textColor: '#d1d5db',
+                    },
+                    grid: {
+                        vertLines: { color: '#334155' },
+                        horzLines: { color: '#334155' },
+                    },
+                    timeScale: {
+                        timeVisible: true,
+                        secondsVisible: true,
+                    },
+                    rightPriceScale: {
+                        visible: true,
+                    },
+                    leftPriceScale: {
+                        visible: false,
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                });
+                
+                // Отслеживаем взаимодействие пользователя с графиком
+                chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
+                    lastUserInteraction = Date.now();
+                    autoScroll = false;
+                });
+                
+                // Восстанавливаем автоследование через 10 секунд
+                setInterval(() => {
+                    if (!autoScroll && Date.now() - lastUserInteraction > 10000) {
+                        autoScroll = true;
+                    }
+                }, 1000);
+
+                // Линия спреда входа (зеленая)
+                entrySpreadSeries = chart.addLineSeries({
+                    color: '#10b981',
+                    lineWidth: 2,
+                    title: 'Спред входа',
+                });
+
+                // Линия спреда выхода (красная)
+                exitSpreadSeries = chart.addLineSeries({
+                    color: '#ef4444',
+                    lineWidth: 2,
+                    title: 'Спред выхода',
+                });
+                
+                // Добавляем горизонтальные линии уровней
+                updateLevelLines();
+                
+                // Включаем перетаскивание линий
+                enableLineDragging();
+                
+                // Адаптивность при изменении размера окна
+                window.addEventListener('resize', () => {
+                    if (chart) {
+                        chart.applyOptions({ 
+                            width: chartContainer.clientWidth 
+                        });
+                    }
+                });
+                
+                // Двойной клик по графику - возврат к последним данным
+                chartContainer.addEventListener('dblclick', () => {
+                    if (chart) {
+                        autoScroll = true;
+                        chart.timeScale().scrollToRealTime();
+                    }
+                });
+                
+                // Загружаем историю
+                loadHistory();
+                
+                console.log('График инициализирован');
+            } catch (error) {
+                console.error('Ошибка инициализации графика:', error);
+            }
+        }
+
+        // Обновление линий уровней на графике
+        function updateLevelLines() {
+            if (!entrySpreadSeries || !exitSpreadSeries) return;
+            
+            const entryLevel = parseFloat(entrySpread.value) || 1.5;
+            const exitLevel = parseFloat(exitSpread.value) || 0.5;
+            
+            // Удаляем старые линии если есть
+            if (entryLevelLine) {
+                entrySpreadSeries.removePriceLine(entryLevelLine);
+            }
+            if (exitLevelLine) {
+                exitSpreadSeries.removePriceLine(exitLevelLine);
+            }
+            
+            // Линия уровня входа (зеленая пунктирная)
+            entryLevelLine = entrySpreadSeries.createPriceLine({
+                price: entryLevel,
+                color: '#10b981',
+                lineWidth: 2,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'Вход ' + entryLevel + '%',
+            });
+            
+            // Линия уровня выхода (красная пунктирная)
+            exitLevelLine = exitSpreadSeries.createPriceLine({
+                price: exitLevel,
+                color: '#ef4444',
+                lineWidth: 2,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'Выход ' + exitLevel + '%',
+            });
+            
+            // Нулевая линия (серая)
+            entrySpreadSeries.createPriceLine({
+                price: 0,
+                color: '#64748b',
+                lineWidth: 1,
+                lineStyle: LightweightCharts.LineStyle.Solid,
+                axisLabelVisible: false,
+                title: '',
+            });
+        }
+        
+        // Функция для перетаскивания линий мышкой
+        function enableLineDragging() {
+            if (!chart) return;
+            
+            let isDragging = false;
+            let dragTarget = null; // 'entry' или 'exit'
+            
+            const chartElement = document.getElementById('spreadChart');
+            
+            chartElement.addEventListener('mousedown', (e) => {
+                const rect = chartElement.getBoundingClientRect();
+                const price = entrySpreadSeries.coordinateToPrice(e.clientY - rect.top);
+                
+                if (!price) return;
+                
+                const entryLevel = parseFloat(entrySpread.value) || 1.5;
+                const exitLevel = parseFloat(exitSpread.value) || 0.5;
+                
+                // Проверяем, близко ли к линии входа (порог 0.1%)
+                if (Math.abs(price - entryLevel) < 0.1) {
+                    isDragging = true;
+                    dragTarget = 'entry';
+                    e.preventDefault();
+                }
+                // Проверяем линию выхода
+                else if (Math.abs(price - exitLevel) < 0.1) {
+                    isDragging = true;
+                    dragTarget = 'exit';
+                    e.preventDefault();
+                }
+            });
+            
+            chartElement.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const rect = chartElement.getBoundingClientRect();
+                const price = entrySpreadSeries.coordinateToPrice(e.clientY - rect.top);
+                
+                if (!price || price < 0) return;
+                
+                // Обновляем значение и линию
+                if (dragTarget === 'entry') {
+                    entrySpread.value = price.toFixed(2);
+                } else if (dragTarget === 'exit') {
+                    exitSpread.value = price.toFixed(2);
+                }
+                
+                calculateProfit();
+                updateLevelLines();
+            });
+            
+            chartElement.addEventListener('mouseup', () => {
+                isDragging = false;
+                dragTarget = null;
+            });
+            
+            chartElement.addEventListener('mouseleave', () => {
+                isDragging = false;
+                dragTarget = null;
+            });
+        }
+
+        // Загрузка истории спреда
+        async function loadHistory() {
+            const coin = coinSymbol.value.toUpperCase();
+            const short = shortExchange.value;
+            const long = longExchange.value;
+            const sType = shortType.value;
+            const lType = longType.value;
+            
+            if (!coin || !short || !long) return;
+            
+            const API_URL = 'http://localhost:8000';
+            
+            try {
+                const response = await fetch(
+                    `${API_URL}/api/spread/history?coin=${coin}&short_exchange=${short}&short_type=${sType}&long_exchange=${long}&long_type=${lType}&limit=100`
+                );
+                
+                if (!response.ok) return;
+                
+                const result = await response.json();
+                const history = result.data;
+                
+                if (!history || history.length === 0) return;
+                
+                // Форматируем данные для графика
+                const entryData = history.map(point => ({
+                    time: point.time,
+                    value: point.entry_spread
+                }));
+                
+                const exitData = history.map(point => ({
+                    time: point.time,
+                    value: point.exit_spread
+                }));
+                
+                entrySpreadSeries.setData(entryData);
+                exitSpreadSeries.setData(exitData);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки истории:', error);
+            }
+        }
+
+        // Обновление графика новой точкой
+        function updateChart(entrySpread, exitSpread) {
+            if (!chart) return;
+            
+            const timestamp = Date.now() / 1000;
+            
+            entrySpreadSeries.update({
+                time: timestamp,
+                value: entrySpread
+            });
+            
+            exitSpreadSeries.update({
+                time: timestamp,
+                value: exitSpread
+            });
+            
+            // Если автоскролл включен - двигаем к последним данным
+            if (autoScroll) {
+                chart.timeScale().scrollToRealTime();
+            }
+        }
+
         // Функция запуска обновления данных
         function startUpdating() {
             updateLiveData(); // Первое обновление сразу
-            updateInterval = setInterval(updateLiveData, 1000);
+            updateInterval = setInterval(updateLiveData, 500); // Обновление каждые 500мс
         }
 
         // Функция остановки обновления данных
@@ -567,8 +881,8 @@
             }
         }
 
-        // Функция обновления онлайн данных (пока симуляция)
-        function updateLiveData() {
+        // Функция обновления онлайн данных
+        async function updateLiveData() {
             // Проверяем, что все данные заполнены
             const coin = coinSymbol.value.toUpperCase();
             const short = shortExchange.value;
@@ -583,183 +897,38 @@
                 return;
             }
             
-            // Получаем данные с бирж
-            fetchSpreadData(coin, short, sType, long, lType);
-        }
-
-        // Функция получения цены с биржи
-        async function getPrice(exchange, coin, type) {
+            // API URL - локальный бэкенд
+            const API_URL = 'http://localhost:8000';
+            
             try {
-                const symbol = coin + 'USDT';
-                let url = '';
+                // Запрос к бэкенду для расчета спреда
+                const response = await fetch(`${API_URL}/api/spread`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        coin: coin,
+                        short_exchange: short,
+                        short_type: sType,
+                        long_exchange: long,
+                        long_type: lType
+                    })
+                });
                 
-                switch(exchange) {
-                    case 'binance':
-                        if (type === 'futures') {
-                            url = `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`;
-                        } else {
-                            url = `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`;
-                        }
-                        break;
-                    case 'bybit':
-                        const category = type === 'futures' ? 'linear' : 'spot';
-                        url = `https://api.bybit.com/v5/market/tickers?category=${category}&symbol=${symbol}`;
-                        break;
-                    case 'okx':
-                        const instType = type === 'futures' ? 'SWAP' : 'SPOT';
-                        const instId = type === 'futures' ? `${coin}-USDT-SWAP` : `${coin}-USDT`;
-                        url = `https://www.okx.com/api/v5/market/ticker?instId=${instId}`;
-                        break;
-                    case 'gateio':
-                        const settle = type === 'futures' ? 'usdt' : '';
-                        if (type === 'futures') {
-                            url = `https://api.gateio.ws/api/v4/futures/usdt/contracts/${symbol}`;
-                        } else {
-                            url = `https://api.gateio.ws/api/v4/spot/tickers?currency_pair=${symbol}`;
-                        }
-                        break;
-                    case 'kucoin':
-                        if (type === 'futures') {
-                            url = `https://api-futures.kucoin.com/api/v1/ticker?symbol=${symbol}`;
-                        } else {
-                            url = `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${symbol}`;
-                        }
-                        break;
-                    case 'mexc':
-                        if (type === 'futures') {
-                            url = `https://contract.mexc.com/api/v1/contract/ticker?symbol=${symbol}`;
-                        } else {
-                            url = `https://api.mexc.com/api/v3/ticker/price?symbol=${symbol}`;
-                        }
-                        break;
-                    case 'bitget':
-                        const productType = type === 'futures' ? 'umcbl' : 'spot';
-                        const sym = type === 'futures' ? `${coin}USDT_UMCBL` : `${symbol}`;
-                        url = `https://api.bitget.com/api/mix/v1/market/ticker?symbol=${sym}&productType=${productType}`;
-                        break;
-                    default:
-                        return null;
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
                 
-                const response = await fetch(url);
                 const data = await response.json();
                 
-                // Парсим цену в зависимости от биржи
-                let price = null;
-                switch(exchange) {
-                    case 'binance':
-                        price = parseFloat(data.price);
-                        break;
-                    case 'bybit':
-                        price = parseFloat(data.result?.list?.[0]?.lastPrice);
-                        break;
-                    case 'okx':
-                        price = parseFloat(data.data?.[0]?.last);
-                        break;
-                    case 'gateio':
-                        if (type === 'futures') {
-                            price = parseFloat(data.last_price);
-                        } else {
-                            price = parseFloat(data[0]?.last);
-                        }
-                        break;
-                    case 'kucoin':
-                        price = parseFloat(data.data?.price);
-                        break;
-                    case 'mexc':
-                        if (type === 'futures') {
-                            price = parseFloat(data.data?.lastPrice);
-                        } else {
-                            price = parseFloat(data.price);
-                        }
-                        break;
-                    case 'bitget':
-                        price = parseFloat(data.data?.last);
-                        break;
-                }
+                // Обновляем данные на экране
+                liveEntrySpread.textContent = data.entry_spread.toFixed(2) + '%';
+                liveExitSpread.textContent = data.exit_spread.toFixed(2) + '%';
+                liveFunding.textContent = data.funding_rate.toFixed(4) + '%';
                 
-                return price;
-            } catch (error) {
-                console.error(`Ошибка получения цены с ${exchange}:`, error);
-                return null;
-            }
-        }
-
-        // Функция получения фандинга
-        async function getFunding(exchange, coin) {
-            try {
-                const symbol = coin + 'USDT';
-                let url = '';
-                
-                switch(exchange) {
-                    case 'binance':
-                        url = `https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`;
-                        break;
-                    case 'bybit':
-                        url = `https://api.bybit.com/v5/market/tickers?category=linear&symbol=${symbol}`;
-                        break;
-                    case 'okx':
-                        url = `https://www.okx.com/api/v5/public/funding-rate?instId=${coin}-USDT-SWAP`;
-                        break;
-                    default:
-                        return 0;
-                }
-                
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                let fundingRate = 0;
-                switch(exchange) {
-                    case 'binance':
-                        fundingRate = parseFloat(data.lastFundingRate) * 100;
-                        break;
-                    case 'bybit':
-                        fundingRate = parseFloat(data.result?.list?.[0]?.fundingRate) * 100;
-                        break;
-                    case 'okx':
-                        fundingRate = parseFloat(data.data?.[0]?.fundingRate) * 100;
-                        break;
-                }
-                
-                return fundingRate;
-            } catch (error) {
-                console.error(`Ошибка получения фандинга с ${exchange}:`, error);
-                return 0;
-            }
-        }
-
-        // Функция расчета спреда
-        async function fetchSpreadData(coin, shortEx, shortT, longEx, longT) {
-            try {
-                // Получаем цены
-                const [shortPrice, longPrice] = await Promise.all([
-                    getPrice(shortEx, coin, shortT),
-                    getPrice(longEx, coin, longT)
-                ]);
-                
-                if (!shortPrice || !longPrice) {
-                    liveEntrySpread.textContent = 'Ошибка';
-                    liveExitSpread.textContent = 'Ошибка';
-                    return;
-                }
-                
-                // Рассчитываем спред в процентах
-                const spread = ((shortPrice - longPrice) / longPrice * 100);
-                
-                // Спред входа (текущий спред)
-                liveEntrySpread.textContent = spread.toFixed(2) + '%';
-                
-                // Спред выхода (симуляция - можно добавить логику)
-                const exitSpreadValue = (spread * 0.3).toFixed(2);
-                liveExitSpread.textContent = exitSpreadValue + '%';
-                
-                // Получаем фандинг для SHORT позиции (если фьючерс)
-                let funding = 0;
-                if (shortT === 'futures') {
-                    funding = await getFunding(shortEx, coin);
-                }
-                
-                liveFunding.textContent = funding.toFixed(4) + '%';
+                // Обновляем график
+                updateChart(data.entry_spread, data.exit_spread);
                 
             } catch (error) {
                 console.error('Ошибка получения данных:', error);
@@ -776,8 +945,14 @@
         shortType.addEventListener('change', calculateProfit);
         longExchange.addEventListener('change', calculateProfit);
         longType.addEventListener('change', calculateProfit);
-        entrySpread.addEventListener('input', calculateProfit);
-        exitSpread.addEventListener('input', calculateProfit);
+        entrySpread.addEventListener('input', () => {
+            calculateProfit();
+            updateLevelLines();
+        });
+        exitSpread.addEventListener('input', () => {
+            calculateProfit();
+            updateLevelLines();
+        });
 
         // Инициализация
         calculateProfit();
