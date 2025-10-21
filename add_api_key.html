@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить API ключ</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 8px;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #0088cc);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .info-box {
+            background: rgba(0, 136, 204, 0.1);
+            border-left: 3px solid var(--tg-theme-button-color, #0088cc);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            color: var(--tg-theme-button-color, #0088cc);
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--tg-theme-button-color, #0088cc);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 8px;
+            color: var(--tg-theme-text-color, #000);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .back-button:active {
+            transform: scale(0.98);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            color: #ef4444;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10b981;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            color: #10b981;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .passphrase-note {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="goBack()">
+            ← Назад
+        </button>
+
+        <div class="header">
+            <h1>🔑 Добавить API ключ</h1>
+            <p>Добавьте ключи для автоматической торговли</p>
+        </div>
+
+        <div class="error" id="errorBox"></div>
+        <div class="success" id="successBox"></div>
+
+        <form id="apiForm">
+            <div class="form-group">
+                <label>Биржа</label>
+                <select id="exchange" required>
+                    <option value="">Выберите биржу</option>
+                    <option value="binance">Binance</option>
+                    <option value="bybit">Bybit</option>
+                    <option value="okx">OKX</option>
+                    <option value="bitget">Bitget</option>
+                    <option value="gateio">Gate.io</option>
+                    <option value="kucoin">KuCoin</option>
+                    <option value="mexc">MEXC</option>
+                    <option value="bingx">BingX</option>
+                    <option value="htx">HTX</option>
+                    <option value="coinex">CoinEx</option>
+                    <option value="xt">XT</option>
+                    <option value="lbank">LBank</option>
+                    <option value="bitmart">BitMart</option>
+                    <option value="ourbit">Ourbit</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="text" id="apiKey" placeholder="Введите API ключ" required>
+            </div>
+
+            <div class="form-group">
+                <label>API Secret</label>
+                <input type="password" id="apiSecret" placeholder="Введите API секрет" required>
+            </div>
+
+            <div class="form-group" id="passphraseGroup" style="display: none;">
+                <label>API Passphrase</label>
+                <input type="password" id="apiPassphrase" placeholder="Введите passphrase">
+                <div class="passphrase-note">Требуется для OKX, KuCoin и Bitget</div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isTestnet">
+                    <label for="isTestnet">Тестовая сеть (Testnet)</label>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>⚠️ Важно:</strong><br>
+                • Создавайте API ключи только с правами на чтение и торговлю<br>
+                • Не давайте права на вывод средств<br>
+                • Используйте IP whitelist если возможно<br>
+                • Ключи хранятся в зашифрованном виде
+            </div>
+
+            <button type="submit" class="button" id="submitBtn">Добавить API ключ</button>
+        </form>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
+
+        const API_URL = 'http://localhost:8000';
+        const form = document.getElementById('apiForm');
+        const exchangeSelect = document.getElementById('exchange');
+        const passphraseGroup = document.getElementById('passphraseGroup');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorBox = document.getElementById('errorBox');
+        const successBox = document.getElementById('successBox');
+
+        // Кнопка назад
+        function goBack() {
+            window.location.href = 'account.html';
+        }
+
+        // Показываем поле passphrase для OKX, KuCoin и Bitget
+        exchangeSelect.addEventListener('change', (e) => {
+            const needsPassphrase = ['okx', 'kucoin', 'bitget'].includes(e.target.value);
+            passphraseGroup.style.display = needsPassphrase ? 'block' : 'none';
+            document.getElementById('apiPassphrase').required = needsPassphrase;
+        });
+
+        // Получаем user_id из Telegram
+        function getUserId() {
+            if (tg?.initDataUnsafe?.user?.id) {
+                return tg.initDataUnsafe.user.id.toString();
+            }
+            // Для тестирования без Telegram
+            return 'test_user_123';
+        }
+
+        // Предзаполнение биржи из URL
+        function prefillFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const exchange = urlParams.get('exchange');
+            
+            if (exchange) {
+                exchangeSelect.value = exchange.toLowerCase();
+                exchangeSelect.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Показываем ошибку
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.style.display = 'block';
+            successBox.style.display = 'none';
+            setTimeout(() => {
+                errorBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Показываем успех
+        function showSuccess(message) {
+            successBox.textContent = message;
+            successBox.style.display = 'block';
+            errorBox.style.display = 'none';
+            setTimeout(() => {
+                successBox.style.display = 'none';
+            }, 3000);
+        }
+
+        // Отправка формы
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                user_id: getUserId(),
+                exchange: exchangeSelect.value,
+                api_key: document.getElementById('apiKey').value,
+                api_secret: document.getElementById('apiSecret').value,
+                api_passphrase: document.getElementById('apiPassphrase').value || null,
+                is_testnet: document.getElementById('isTestnet').checked
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Добавление...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/keys`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.detail || 'Ошибка при добавлении ключа');
+                }
+
+                showSuccess('✅ API ключ успешно добавлен!');
+                form.reset();
+
+                // Через 2 секунды закрываем окно или возвращаемся назад
+                setTimeout(() => {
+                    if (tg) {
+                        tg.close();
+                    } else {
+                        window.location.href = 'account.html';
+                    }
+                }, 2000);
+
+            } catch (error) {
+                showError('❌ ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Добавить API ключ';
+            }
+        });
+
+        // Настройка главной кнопки Telegram
+        if (tg) {
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => {
+                window.location.href = 'account.html';
+            });
+        }
+
+        // Предзаполнение при загрузке
+        prefillFromUrl();
+    </script>
+</body>
+</html>

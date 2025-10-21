@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Аккаунт - Крипто Арбитраж</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Навигация */
+        .nav-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-top: 1px solid var(--tg-theme-hint-color, #ddd);
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 10px 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--tg-theme-hint-color, #999);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-tab.active {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: white;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-label {
+            font-size: 11px;
+        }
+
+        /* Заголовок */
+        .header {
+            text-align: center;
+            padding: 24px 16px 16px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        /* Сетка бирж */
+        .exchanges-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .exchanges-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Карточка биржи */
+        .exchange-card {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+        }
+
+        .exchange-card.connected {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .exchange-card.not-connected {
+            opacity: 0.6;
+        }
+
+        .exchange-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .exchange-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #000);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .exchange-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .btn-delete-top {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            background: rgba(239, 68, 68, 0.1);
+            transition: all 0.2s;
+        }
+
+        .btn-delete-top:active {
+            transform: scale(0.95);
+        }
+
+        .btn-delete-top:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .balance-section {
+            margin-top: 12px;
+        }
+
+        .balance-label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999);
+            margin-bottom: 4px;
+        }
+        
+        .balance-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-refresh-inline {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            background: rgba(0, 136, 204, 0.1);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-refresh-inline:active {
+            transform: scale(0.95);
+        }
+
+        .btn-refresh-inline:hover {
+            background: rgba(0, 136, 204, 0.2);
+        }
+        
+        /* Спиннер загрузки */
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 136, 204, 0.2);
+            border-top-color: var(--tg-theme-button-color, #0088cc);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        
+        .loading-spinner.active {
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .balance-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #0088cc);
+        }
+
+        .balance-value.large {
+            font-size: 18px;
+        }
+
+        .wallet-info {
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .wallet-type {
+            display: inline-block;
+            padding: 2px 6px;
+            background: rgba(0, 136, 204, 0.1);
+            border-radius: 4px;
+            font-weight: 500;
+            margin-right: 4px;
+        }
+
+        /* Кнопка добавления */
+        .add-button {
+            width: 100%;
+            padding: 12px;
+            background: var(--tg-theme-button-color, #0088cc);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .add-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Итоговый баланс */
+        .total-balance {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 16px;
+            text-align: center;
+            color: white;
+            margin: 0 -16px 16px -16px;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .total-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .total-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .empty-state-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--tg-theme-button-color, #0088cc);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        .spinner {
+            border: 3px solid rgba(0, 136, 204, 0.1);
+            border-top: 3px solid var(--tg-theme-button-color, #0088cc);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Карточка добавления биржи */
+        .add-exchange-card {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            border: 2px dashed var(--tg-theme-hint-color, #ddd);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-exchange-card:hover {
+            border-color: var(--tg-theme-button-color, #0088cc);
+            background: rgba(0, 136, 204, 0.05);
+        }
+
+        .add-exchange-card:active {
+            transform: scale(0.98);
+        }
+
+        .add-icon {
+            font-size: 48px;
+            color: var(--tg-theme-button-color, #0088cc);
+            margin-bottom: 12px;
+        }
+
+        .add-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        /* Кнопки управления */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="header">
+            <h1>💼 Аккаунт</h1>
+            <p>Управление биржами и балансами</p>
+        </div>
+
+        <!-- Итоговый баланс -->
+        <div class="total-balance">
+            <div class="total-label">Общий баланс</div>
+            <div class="total-value" id="totalBalance">0.00 USDT</div>
+        </div>
+
+        <!-- Загрузка -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <div>Загрузка данных...</div>
+        </div>
+
+        <!-- Сетка бирж -->
+        <div class="exchanges-grid" id="exchangesGrid" style="display: none;">
+            <!-- Карточки бирж будут добавлены через JS -->
+        </div>
+
+        <!-- Пустое состояние (если нет бирж) -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">🔗</div>
+            <div class="empty-state-text">
+                Биржи ещё не добавлены<br>
+                Добавьте API ключи для начала работы
+            </div>
+            <button class="empty-state-button" onclick="addExchange()">
+                Добавить биржу
+            </button>
+        </div>
+    </div>
+
+    <!-- Навигация -->
+    <div class="nav-tabs">
+        <a href="index.html" class="nav-tab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Стратегия</span>
+        </a>
+        <a href="account.html" class="nav-tab active">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Аккаунт</span>
+        </a>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
+
+        const API_URL = 'http://localhost:8000';
+        
+        // Все доступные биржи
+        const ALL_EXCHANGES = [
+            'binance', 'bybit', 'okx', 'gateio', 'kucoin', 
+            'mexc', 'bitget', 'htx', 'bingx', 'coinex',
+            'xt', 'lbank', 'bitmart', 'bitmex', 'hyperliquid', 'ourbit'
+        ];
+
+        // Получение user_id
+        function getUserId() {
+            if (tg?.initDataUnsafe?.user?.id) {
+                return tg.initDataUnsafe.user.id.toString();
+            }
+            return 'test_user_123'; // Для тестирования
+        }
+
+        // Форматирование названия биржи
+        function formatExchangeName(exchange) {
+            const names = {
+                'binance': 'Binance',
+                'bybit': 'Bybit',
+                'okx': 'OKX',
+                'gateio': 'Gate.io',
+                'kucoin': 'KuCoin',
+                'mexc': 'MEXC',
+                'bitget': 'Bitget',
+                'htx': 'HTX',
+                'bingx': 'BingX',
+                'coinex': 'CoinEx',
+                'xt': 'XT',
+                'lbank': 'LBank',
+                'bitmart': 'BitMart',
+                'bitmex': 'Bitmex',
+                'hyperliquid': 'HyperLiquid',
+                'ourbit': 'Ourbit'
+            };
+            return names[exchange] || exchange.toUpperCase();
+        }
+        
+        // Получение URL иконки биржи
+        function getExchangeIcon(exchange) {
+            const icons = {
+                'binance': 'https://cryptologos.cc/logos/bnb-bnb-logo.png',
+                'bybit': 'https://cryptologos.cc/logos/bybit-logo.png',
+                'okx': 'https://cryptologos.cc/logos/okx-okx-logo.png',
+                'bitget': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/694.png',
+                'gateio': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/302.png',
+                'kucoin': 'https://cryptologos.cc/logos/kucoin-token-kcs-logo.png',
+                'mexc': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/544.png',
+                'bingx': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/1298.png',
+                'htx': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/102.png',
+                'coinex': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/305.png',
+                'xt': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/525.png',
+                'lbank': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/278.png',
+                'bitmart': 'https://s2.coinmarketcap.com/static/img/exchanges/64x64/425.png',
+                'ourbit': 'https://via.placeholder.com/32/0088cc/ffffff?text=O'
+            };
+            return icons[exchange] || `https://ui-avatars.com/api/?name=${exchange}&size=32&background=0088cc&color=fff&bold=true`;
+        }
+
+        // Получение иконки биржи
+        function getExchangeIcon(exchange) {
+            const icons = {
+                'binance': '🟡',
+                'bybit': '🟠', 
+                'okx': '⚫',
+                'bitget': '🔵',
+                'gateio': '🟢',
+                'kucoin': '🟢',
+                'mexc': '🔵',
+                'bingx': '⚪',
+                'htx': '🔴',
+                'coinex': '🟢',
+                'xt': '🟢',
+                'lbank': '🔵',
+                'bitmart': '🟡',
+                'ourbit': '🟢'
+            };
+            return icons[exchange] || '⚪';
+        }
+
+        // Парсинг баланса из JSON строки
+        function parseBalance(balanceStr) {
+            if (!balanceStr) return 0;
+            try {
+                const balance = JSON.parse(balanceStr);
+                return parseFloat(balance.total || balance.USDT || 0);
+            } catch {
+                return 0;
+            }
+        }
+
+        // Загрузка данных
+        async function loadExchanges() {
+            const userId = getUserId();
+            const loadingState = document.getElementById('loadingState');
+            const exchangesGrid = document.getElementById('exchangesGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            try {
+                // Получаем API ключи пользователя
+                const response = await fetch(`${API_URL}/api/keys/${userId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки данных');
+                }
+
+                const userKeys = await response.json();
+                console.log('Загружены ключи:', userKeys);
+
+                // Создаем Map для быстрого поиска
+                const keysMap = new Map();
+                userKeys.forEach(key => {
+                    keysMap.set(key.exchange, key);
+                });
+
+                // Скрываем загрузку
+                loadingState.style.display = 'none';
+
+                // Если нет ключей - показываем пустое состояние
+                if (userKeys.length === 0) {
+                    emptyState.style.display = 'block';
+                    exchangesGrid.style.display = 'none';
+                    return;
+                }
+
+                // Показываем сетку
+                exchangesGrid.style.display = 'grid';
+                emptyState.style.display = 'none';
+
+                // Рендерим все биржи
+                renderExchanges(keysMap);
+
+                // Обновляем общий баланс
+                updateTotalBalance(userKeys);
+
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                loadingState.innerHTML = `
+                    <div style="color: #ef4444;">
+                        ❌ Ошибка загрузки данных<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Рендер карточек бирж (только добавленные)
+        function renderExchanges(keysMap) {
+            const grid = document.getElementById('exchangesGrid');
+            
+            // Фильтруем только те биржи, для которых есть ключи
+            const connectedExchanges = ALL_EXCHANGES.filter(exchange => {
+                const key = keysMap.get(exchange);
+                return key && key.is_active;
+            });
+
+            if (connectedExchanges.length === 0) {
+                grid.style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            const exchangeCards = connectedExchanges.map(exchange => {
+                const key = keysMap.get(exchange);
+                const spotBalance = parseBalance(key.spot_balance);
+                const futuresBalance = parseBalance(key.futures_balance);
+                const totalBalance = spotBalance + futuresBalance;
+
+                // Создаем список кошельков с балансом > 0
+                const wallets = [];
+                if (spotBalance > 0) {
+                    wallets.push({
+                        type: 'Spot',
+                        balance: spotBalance
+                    });
+                }
+                if (futuresBalance > 0) {
+                    wallets.push({
+                        type: 'Futures',
+                        balance: futuresBalance
+                    });
+                }
+
+                return `
+                    <div class="exchange-card connected">
+                        <div class="exchange-header">
+                            <div class="exchange-name">
+                                ${formatExchangeName(exchange)}
+                                <div class="loading-spinner" id="spinner-${key.id}"></div>
+                            </div>
+                            <button class="btn-delete-top" onclick="deleteExchange(${key.id}, '${exchange}')" title="Удалить">
+                                🗑️
+                            </button>
+                        </div>
+                        
+                        <div class="balance-section">
+                            <div class="balance-label">Общий баланс</div>
+                            <div class="balance-row">
+                                <button class="btn-refresh-inline" id="refresh-btn-${key.id}" onclick="refreshBalance('${exchange}', ${key.id})" title="Обновить баланс">
+                                    🔄
+                                </button>
+                                <div class="balance-value ${totalBalance > 10000 ? 'large' : ''}" id="balance-${key.id}">
+                                    ${totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${wallets.length > 0 ? `
+                            <div class="wallet-info" id="wallet-info-${key.id}">
+                                ${wallets.map(wallet => `
+                                    <div>
+                                        <span class="wallet-type">${wallet.type}</span>
+                                        ${wallet.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            // Добавляем карточку "Добавить биржу" в конец
+            exchangeCards.push(`
+                <div class="add-exchange-card" onclick="addExchange()">
+                    <div class="add-icon">➕</div>
+                    <div class="add-text">Добавить биржу</div>
+                </div>
+            `);
+
+            grid.innerHTML = exchangeCards.join('');
+        }
+
+        // Обновление общего баланса
+        function updateTotalBalance(userKeys) {
+            const total = userKeys.reduce((sum, key) => {
+                const spot = parseBalance(key.spot_balance);
+                const futures = parseBalance(key.futures_balance);
+                return sum + spot + futures;
+            }, 0);
+            
+            document.getElementById('totalBalance').textContent = 
+                total.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT';
+        }
+
+        // Добавление биржи
+        function addExchange(exchangeName = null) {
+            if (exchangeName) {
+                window.location.href = `add_api_key.html?exchange=${exchangeName}`;
+            } else {
+                window.location.href = 'add_api_key.html';
+            }
+        }
+
+        // Обновление баланса (теперь реально работает)
+        async function refreshBalance(exchange, keyId) {
+            const spinner = document.getElementById(`spinner-${keyId}`);
+            
+            // Показываем спиннер
+            if (spinner) {
+                spinner.classList.add('active');
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/keys/${keyId}/refresh-balance`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка обновления баланса');
+                }
+
+                const data = await response.json();
+                
+                // Обновляем UI
+                updateBalanceUI(keyId, data);
+                
+            } catch (error) {
+                console.error('Ошибка обновления баланса:', error);
+                alert('❌ Ошибка обновления баланса: ' + error.message);
+            } finally {
+                // Скрываем спиннер
+                if (spinner) {
+                    spinner.classList.remove('active');
+                }
+            }
+        }
+
+        // Обновление UI с новыми балансами
+        function updateBalanceUI(keyId, data) {
+            const spotTotal = data.spot_balance.total || 0;
+            const futuresTotal = data.futures_balance.total || 0;
+            const total = spotTotal + futuresTotal;
+
+            // Обновляем общий баланс
+            const balanceEl = document.getElementById(`balance-${keyId}`);
+            if (balanceEl) {
+                balanceEl.textContent = total.toLocaleString('ru-RU', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                }) + ' USDT';
+            }
+
+            // Обновляем детали кошельков - показываем только где баланс > 0
+            const walletInfoEl = document.getElementById(`wallet-info-${keyId}`);
+            if (walletInfoEl) {
+                let html = '';
+                if (spotTotal > 0) {
+                    html += `
+                        <div>
+                            <span class="wallet-type">Spot</span>
+                            ${spotTotal.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
+                        </div>
+                    `;
+                }
+                if (futuresTotal > 0) {
+                    html += `
+                        <div>
+                            <span class="wallet-type">Futures</span>
+                            ${futuresTotal.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
+                        </div>
+                    `;
+                }
+                walletInfoEl.innerHTML = html;
+            }
+
+            // Перезагружаем все данные для обновления итогового баланса
+            loadExchanges();
+        }
+
+        // Автообновление всех балансов
+        async function refreshAllBalances(userKeys) {
+            const userId = getUserId();
+            
+            try {
+                console.log('Обновление всех балансов...');
+                
+                // Показываем спиннеры для всех бирж
+                if (userKeys && Array.isArray(userKeys)) {
+                    userKeys.forEach(key => {
+                        const spinner = document.getElementById(`spinner-${key.id}`);
+                        if (spinner) {
+                            spinner.classList.add('active');
+                        }
+                    });
+                }
+
+                const response = await fetch(`${API_URL}/api/keys/${userId}/refresh-all`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка обновления балансов');
+                }
+
+                const data = await response.json();
+                console.log(`Обновлено: ${data.updated}, Ошибок: ${data.errors}`);
+
+                // Обновляем балансы в UI напрямую
+                if (data.results && Array.isArray(data.results)) {
+                    data.results.forEach(result => {
+                        if (result.success) {
+                            // Находим key по exchange
+                            const key = userKeys.find(k => k.exchange === result.exchange);
+                            if (key) {
+                                updateBalanceUI(key.id, {
+                                    spot_balance: { total: result.spot },
+                                    futures_balance: { total: result.futures }
+                                });
+                            }
+                        }
+                    });
+                }
+                
+                // Скрываем спиннеры
+                if (userKeys && Array.isArray(userKeys)) {
+                    userKeys.forEach(key => {
+                        const spinner = document.getElementById(`spinner-${key.id}`);
+                        if (spinner) {
+                            spinner.classList.remove('active');
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Ошибка автообновления:', error);
+                
+                // Скрываем спиннеры в случае ошибки
+                if (userKeys && Array.isArray(userKeys)) {
+                    userKeys.forEach(key => {
+                        const spinner = document.getElementById(`spinner-${key.id}`);
+                        if (spinner) {
+                            spinner.classList.remove('active');
+                        }
+                    });
+                }
+            }
+        }
+
+        // Удаление биржи
+        async function deleteExchange(keyId, exchange) {
+            const confirmed = confirm(`Удалить API ключ для ${formatExchangeName(exchange)}?`);
+            
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/keys/${keyId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении');
+                }
+
+                alert('✅ API ключ успешно удален');
+                loadExchanges(); // Перезагрузка данных
+
+            } catch (error) {
+                alert('❌ Ошибка: ' + error.message);
+            }
+        }
+
+        // Инициализация при загрузке
+        (async function init() {
+            await loadExchanges();
+            
+            // Однократное обновление балансов при открытии страницы
+            const userId = getUserId();
+            const response = await fetch(`${API_URL}/api/keys/${userId}`);
+            if (response.ok) {
+                const userKeys = await response.json();
+                await refreshAllBalances(userKeys);
+            }
+        })();
+
+        // Настройка главной кнопки Telegram
+        if (tg) {
+            tg.MainButton.text = "Добавить биржу";
+            tg.MainButton.show();
+            tg.MainButton.onClick(() => {
+                addExchange();
+            });
+        }
+    </script>
+</body>
+</html>

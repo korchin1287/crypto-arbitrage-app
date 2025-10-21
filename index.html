@@ -17,13 +17,58 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
-            padding: 16px;
-            padding-bottom: 32px;
+            padding-bottom: 80px;
+        }
+
+        /* Навигация */
+        .nav-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-top: 1px solid var(--tg-theme-hint-color, #ddd);
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 10px 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--tg-theme-hint-color, #999);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .nav-tab.active {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: white;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        .nav-label {
+            font-size: 11px;
         }
 
         .container {
             max-width: 600px;
             margin: 0 auto;
+            padding: 0 16px;
         }
 
         .header {
@@ -175,17 +220,6 @@
             opacity: 0.8;
         }
 
-        .exchange-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            background: var(--tg-theme-button-color, #0088cc);
-            color: white;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-right: 4px;
-        }
-
         .info-box {
             background: rgba(0, 136, 204, 0.1);
             border-left: 3px solid var(--tg-theme-button-color, #0088cc);
@@ -263,26 +297,29 @@
             border-top: 1px solid var(--tg-theme-hint-color, #ddd);
         }
 
-        .online-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        .spreads-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
         }
-
-        .online-item:last-child {
-            border-bottom: none;
+        
+        .spread-item {
+            background: rgba(0, 136, 204, 0.05);
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
         }
-
-        .online-label {
-            font-size: 15px;
+        
+        .spread-label {
+            font-size: 11px;
             font-weight: 500;
-            color: var(--tg-theme-text-color, #000);
+            color: var(--tg-theme-hint-color, #999);
+            margin-bottom: 4px;
         }
-
-        .online-value {
-            font-size: 18px;
+        
+        .spread-value {
+            font-size: 16px;
             font-weight: 700;
             color: var(--tg-theme-button-color, #0088cc);
         }
@@ -290,6 +327,7 @@
         .coin-section {
             text-align: center;
             padding: 24px 16px;
+            margin-bottom: 16px;
         }
 
         .coin-input {
@@ -316,6 +354,145 @@
             color: var(--tg-theme-hint-color, #999);
         }
 
+        .coin-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            max-height: 180px;
+            overflow-y: auto;
+            background: var(--tg-theme-bg-color, #fff);
+            border: 2px solid var(--tg-theme-button-color, #0088cc);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-top: 2px;
+        }
+
+        .coin-suggestions.show {
+            display: block;
+        }
+
+        .coin-suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: background 0.2s;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .coin-suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .coin-suggestion-item:hover {
+            background: rgba(0, 136, 204, 0.15);
+        }
+
+        .coin-suggestion-item.active {
+            background: var(--tg-theme-button-color, #0088cc) !important;
+            color: #ffffff !important;
+        }
+        
+        .coin-suggestion-item:hover .coin-suggestion-label {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .coin-suggestion-item.active .coin-suggestion-label {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .coin-suggestion-item.recent {
+            background: rgba(0, 136, 204, 0.05);
+        }
+        
+        .coin-suggestion-item.recent:hover {
+            background: rgba(0, 136, 204, 0.15);
+        }
+
+        .coin-suggestion-label {
+            font-size: 10px;
+            color: var(--tg-theme-hint-color, #999);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .availability-indicator {
+            margin-top: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .availability-indicator.checking {
+            background: rgba(251, 191, 36, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .availability-indicator.available {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .availability-indicator.unavailable {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .availability-icon {
+            font-size: 16px;
+        }
+
+        .toggle-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .position-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: transparent;
+        }
+        
+        .position-status.checking {
+            color: #f59e0b;
+        }
+        
+        .position-status.available {
+            color: #10b981;
+        }
+        
+        .position-status.unavailable {
+            color: #ef4444;
+        }
+        
+        .position-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
         .positions-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -335,6 +512,47 @@
             margin-top: 16px;
             border-radius: 8px;
             overflow: hidden;
+            position: relative;
+        }
+        
+        .chart-legend {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 10;
+            display: flex;
+            gap: 12px;
+            pointer-events: none;
+        }
+        
+        .legend-item {
+            background: rgba(30, 41, 59, 0.9);
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #d1d5db;
+        }
+        
+        .legend-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #6b7280;
+        }
+        
+        .legend-status.online {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        .legend-label {
+            opacity: 0.7;
+            font-size: 10px;
+            margin-right: 4px;
         }
     </style>
 </head>
@@ -347,8 +565,9 @@
 
         <!-- Выбор монеты -->
         <div class="section coin-section">
-            <div class="input-group">
-                <input type="text" id="coinSymbol" placeholder="BTC" class="coin-input">
+            <div class="input-group" style="position: relative;">
+                <input type="text" id="coinSymbol" placeholder="BTC" class="coin-input" autocomplete="off">
+                <div id="coinSuggestions" class="coin-suggestions"></div>
             </div>
         </div>
 
@@ -356,7 +575,10 @@
         <div class="positions-grid">
             <!-- Шорт позиция -->
             <div class="section">
-                <div class="section-title">🔴 Шорт</div>
+                <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
+                    🔴 Шорт
+                    <span class="position-status" id="shortPositionStatus"></span>
+                </div>
                 
                 <div class="select-group">
                     <label>Биржа</label>
@@ -392,7 +614,10 @@
 
             <!-- Лонг позиция -->
             <div class="section">
-                <div class="section-title">🟢 Лонг</div>
+                <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
+                    🟢 Лонг
+                    <span class="position-status" id="longPositionStatus"></span>
+                </div>
                 
                 <div class="select-group">
                     <label>Биржа</label>
@@ -435,21 +660,38 @@
             </button>
             
             <div id="onlineData" class="online-data" style="display: none;">
-                <div class="online-item">
-                    <div class="online-label">📈 Спред входа</div>
-                    <div class="online-value" id="liveEntrySpread">--%</div>
-                </div>
-                <div class="online-item">
-                    <div class="online-label">📉 Спред выхода</div>
-                    <div class="online-value" id="liveExitSpread">--%</div>
-                </div>
-                <div class="online-item">
-                    <div class="online-label">💰 Фандинг</div>
-                    <div class="online-value" id="liveFunding">--%</div>
+                <!-- Спреды в одну строку -->
+                <div class="spreads-row">
+                    <div class="spread-item">
+                        <div class="spread-label">📈 Вход</div>
+                        <div class="spread-value" id="liveEntrySpread">--%</div>
+                    </div>
+                    <div class="spread-item">
+                        <div class="spread-label">📉 Выход</div>
+                        <div class="spread-value" id="liveExitSpread">--%</div>
+                    </div>
+                    <div class="spread-item">
+                        <div class="spread-label">💰 Фандинг</div>
+                        <div class="spread-value" id="liveFunding">--%</div>
+                    </div>
                 </div>
                 
                 <!-- График истории спреда -->
-                <div id="spreadChart"></div>
+                <div id="spreadChart">
+                    <!-- Легенда со статусами -->
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-label">SHORT</span>
+                            <span class="legend-status" id="chartShortStatus"></span>
+                            <span id="chartShortName">-</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-label">LONG</span>
+                            <span class="legend-status" id="chartLongStatus"></span>
+                            <span id="chartLongName">-</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -488,6 +730,18 @@
         </div>
     </div>
 
+    <!-- Навигация -->
+    <div class="nav-tabs">
+        <a href="index.html" class="nav-tab active">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Стратегия</span>
+        </a>
+        <a href="account.html" class="nav-tab">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Аккаунт</span>
+        </a>
+    </div>
+
     <script>
         // Инициализация Telegram Web App
         let tg = window.Telegram?.WebApp;
@@ -498,6 +752,7 @@
 
         // Элементы
         const coinSymbol = document.getElementById('coinSymbol');
+        const coinSuggestions = document.getElementById('coinSuggestions');
         const shortExchange = document.getElementById('shortExchange');
         const shortType = document.getElementById('shortType');
         const longExchange = document.getElementById('longExchange');
@@ -506,6 +761,145 @@
         const exitSpread = document.getElementById('exitSpread');
         const profitValue = document.getElementById('profitValue');
         const strategyPreview = document.getElementById('strategyPreview');
+        
+        // Популярные монеты по умолчанию
+        const defaultCoins = [
+            'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'ADA', 'AVAX', 'DOGE', 'DOT', 'MATIC',
+            'SHIB', 'LTC', 'TRX', 'LINK', 'UNI', 'ATOM', 'XLM', 'TON', 'FIL', 'NEAR',
+            'APT', 'ARB', 'OP', 'SUI', 'INJ', 'SEI', 'WLD', 'PEPE', 'FET', 'RENDER'
+        ];
+        
+        // Загрузка пользовательских монет из localStorage
+        function loadUserCoins() {
+            const saved = localStorage.getItem('userCoins');
+            return saved ? JSON.parse(saved) : [];
+        }
+        
+        // Сохранение монеты в localStorage
+        function saveUserCoin(coin) {
+            const userCoins = loadUserCoins();
+            const upperCoin = coin.toUpperCase();
+            
+            if (!userCoins.includes(upperCoin) && !defaultCoins.includes(upperCoin)) {
+                userCoins.unshift(upperCoin);
+                
+                if (userCoins.length > 50) {
+                    userCoins.pop();
+                }
+                
+                localStorage.setItem('userCoins', JSON.stringify(userCoins));
+                console.log('💾 Сохранена новая монета:', upperCoin);
+            }
+        }
+        
+        // Получение всех монет
+        function getAllCoins() {
+            const userCoins = loadUserCoins();
+            return [...userCoins, ...defaultCoins];
+        }
+        
+        // Фильтрация монет
+        function filterCoins(query) {
+            if (!query) return [];
+            
+            const upperQuery = query.toUpperCase();
+            const allCoins = getAllCoins();
+            const userCoins = loadUserCoins();
+            
+            return allCoins
+                .filter(coin => coin.startsWith(upperQuery))
+                .slice(0, 10)
+                .map(coin => ({
+                    symbol: coin,
+                    isRecent: userCoins.includes(coin)
+                }));
+        }
+        
+        // Отображение подсказок
+        function showSuggestions(suggestions) {
+            if (suggestions.length === 0) {
+                coinSuggestions.classList.remove('show');
+                return;
+            }
+            
+            coinSuggestions.innerHTML = suggestions.map(item => `
+                <div class="coin-suggestion-item ${item.isRecent ? 'recent' : ''}" data-coin="${item.symbol}">
+                    ${item.symbol}
+                    ${item.isRecent ? '<div class="coin-suggestion-label">недавно использовано</div>' : ''}
+                </div>
+            `).join('');
+            
+            coinSuggestions.classList.add('show');
+            
+            coinSuggestions.querySelectorAll('.coin-suggestion-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const coin = item.dataset.coin;
+                    coinSymbol.value = coin;
+                    coinSuggestions.classList.remove('show');
+                    calculateProfit();
+                    
+                    // Перепроверяем обе позиции
+                    if (shortExchange.value) scheduleShortCheck();
+                    if (longExchange.value) scheduleLongCheck();
+                });
+            });
+        }
+        
+        // Обработка ввода
+        coinSymbol.addEventListener('input', (e) => {
+            const query = e.target.value;
+            const suggestions = filterCoins(query);
+            showSuggestions(suggestions);
+            calculateProfit();
+            
+            // Проверяем обе позиции если биржи уже выбраны
+            const coin = query.trim();
+            if (coin.length >= 2) {
+                if (shortExchange.value) scheduleShortCheck();
+                if (longExchange.value) scheduleLongCheck();
+            }
+        });
+        
+        // Скрываем подсказки
+        document.addEventListener('click', (e) => {
+            if (!coinSymbol.contains(e.target) && !coinSuggestions.contains(e.target)) {
+                coinSuggestions.classList.remove('show');
+            }
+        });
+        
+        // Навигация стрелками
+        let selectedIndex = -1;
+        coinSymbol.addEventListener('keydown', (e) => {
+            const items = coinSuggestions.querySelectorAll('.coin-suggestion-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelection(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                updateSelection(items);
+            } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                e.preventDefault();
+                items[selectedIndex].click();
+                selectedIndex = -1;
+            } else if (e.key === 'Escape') {
+                coinSuggestions.classList.remove('show');
+                selectedIndex = -1;
+            }
+        });
+        
+        function updateSelection(items) {
+            items.forEach((item, index) => {
+                if (index === selectedIndex) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
         
         // Онлайн режим
         const toggleOnline = document.getElementById('toggleOnline');
@@ -516,8 +910,52 @@
         const liveExitSpread = document.getElementById('liveExitSpread');
         const liveFunding = document.getElementById('liveFunding');
         
+        // Индикаторы доступности
+        const shortPositionStatus = document.getElementById('shortPositionStatus');
+        const longPositionStatus = document.getElementById('longPositionStatus');
+        
+        // Элементы легенды на графике
+        const chartShortStatus = document.getElementById('chartShortStatus');
+        const chartShortName = document.getElementById('chartShortName');
+        const chartLongStatus = document.getElementById('chartLongStatus');
+        const chartLongName = document.getElementById('chartLongName');
+        
+        // Статус доступности монет
+        let shortCoinAvailable = false;
+        let longCoinAvailable = false;
+        
+        // Статусы бирж для отображения на графике
+        let shortExchangeStatus = 'offline';
+        let longExchangeStatus = 'offline';
+        
+        // Функция обновления статуса биржи на графике
+        function updateChartExchangeStatus(type, exchange, status) {
+            if (type === 'short') {
+                const name = exchange ? shortExchange.options[shortExchange.selectedIndex].text : '-';
+                chartShortName.textContent = name;
+                
+                if (status === 'online') {
+                    chartShortStatus.classList.add('online');
+                } else {
+                    chartShortStatus.classList.remove('online');
+                }
+                shortExchangeStatus = status;
+            } else if (type === 'long') {
+                const name = exchange ? longExchange.options[longExchange.selectedIndex].text : '-';
+                chartLongName.textContent = name;
+                
+                if (status === 'online') {
+                    chartLongStatus.classList.add('online');
+                } else {
+                    chartLongStatus.classList.remove('online');
+                }
+                longExchangeStatus = status;
+            }
+        }
+        
         let isOnline = false;
         let updateInterval = null;
+        let checkTimeout = null;
         
         // График
         let chart = null;
@@ -525,10 +963,101 @@
         let exitSpreadSeries = null;
         let entryLevelLine = null;
         let exitLevelLine = null;
-        let lastUserInteraction = Date.now();
         let autoScroll = true;
+        
+        // Функция проверки доступности монеты
+        async function checkCoinAvailability(exchange, coin, type, statusElement) {
+            if (!exchange || !coin || coin.length < 2) {
+                statusElement.style.display = 'none';
+                return false;
+            }
+            
+            statusElement.style.display = 'inline-flex';
+            statusElement.className = 'position-status checking';
+            statusElement.textContent = 'Проверка';
+            
+            const API_URL = 'http://localhost:8000';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/price?exchange=${exchange}&coin=${coin.toUpperCase()}&type=${type}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.price && data.price > 0) {
+                        statusElement.className = 'position-status available';
+                        statusElement.textContent = 'Доступна';
+                        return true;
+                    }
+                }
+                
+                statusElement.className = 'position-status unavailable';
+                statusElement.textContent = 'Нет монеты';
+                return false;
+                
+            } catch (error) {
+                console.error('Ошибка проверки доступности:', error);
+                statusElement.className = 'position-status unavailable';
+                statusElement.textContent = 'Ошибка';
+                return false;
+            }
+        }
+        
+        // ИСПРАВЛЕНИЕ: раздельная проверка позиций
+        async function checkShortPosition() {
+            const coin = coinSymbol.value.trim().toUpperCase();
+            const shortEx = shortExchange.value;
+            const shortT = shortType.value;
+            
+            if (shortEx && coin.length >= 2) {
+                shortCoinAvailable = await checkCoinAvailability(shortEx, coin, shortT, shortPositionStatus);
+                updateOnlineButton();
+            }
+        }
+        
+        async function checkLongPosition() {
+            const coin = coinSymbol.value.trim().toUpperCase();
+            const longEx = longExchange.value;
+            const longT = longType.value;
+            
+            if (longEx && coin.length >= 2) {
+                longCoinAvailable = await checkCoinAvailability(longEx, coin, longT, longPositionStatus);
+                updateOnlineButton();
+            }
+        }
+        
+        // Обновление кнопки Online
+        function updateOnlineButton() {
+            const coin = coinSymbol.value.trim();
+            const hasShort = shortExchange.value && coin.length >= 2;
+            const hasLong = longExchange.value && coin.length >= 2;
+            const bothAvailable = shortCoinAvailable && longCoinAvailable;
+            
+            if (hasShort && hasLong && bothAvailable) {
+                toggleOnline.disabled = false;
+            } else {
+                toggleOnline.disabled = true;
+            }
+        }
+        
+        // Debounce для проверки
+        let shortCheckTimeout = null;
+        let longCheckTimeout = null;
+        
+        function scheduleShortCheck() {
+            if (shortCheckTimeout) {
+                clearTimeout(shortCheckTimeout);
+            }
+            shortCheckTimeout = setTimeout(checkShortPosition, 500);
+        }
+        
+        function scheduleLongCheck() {
+            if (longCheckTimeout) {
+                clearTimeout(longCheckTimeout);
+            }
+            longCheckTimeout = setTimeout(checkLongPosition, 500);
+        }
 
-        // Функция расчета прибыли
+        // Расчет прибыли
         function calculateProfit() {
             const entry = parseFloat(entrySpread.value) || 0;
             const exit = parseFloat(exitSpread.value) || 0;
@@ -540,7 +1069,7 @@
             updateStrategyPreview();
         }
 
-        // Функция обновления превью стратегии
+        // Обновление превью стратегии
         function updateStrategyPreview() {
             const short = shortExchange.value;
             const long = longExchange.value;
@@ -571,18 +1100,22 @@
             `;
         }
 
-        // Функция переключения онлайн режима
+        // Переключение онлайн режима
         function toggleOnlineMode() {
             isOnline = !isOnline;
             
             if (isOnline) {
+                const coin = coinSymbol.value.trim().toUpperCase();
+                if (coin.length >= 2) {
+                    saveUserCoin(coin);
+                }
+                
                 toggleOnline.classList.add('online');
                 statusIndicator.classList.add('online');
                 toggleText.textContent = 'Online спред + фандинг';
                 onlineData.style.display = 'block';
-                autoScroll = true; // Включаем автоскролл
+                autoScroll = true;
                 
-                // Небольшая задержка чтобы контейнер успел отрисоваться
                 setTimeout(() => {
                     initChart();
                     startUpdating();
@@ -593,14 +1126,22 @@
                 toggleText.textContent = 'Online спред + фандинг';
                 onlineData.style.display = 'none';
                 stopUpdating();
+                
+                if (chart) {
+                    chart.remove();
+                    chart = null;
+                    entrySpreadSeries = null;
+                    exitSpreadSeries = null;
+                    entryLevelLine = null;
+                    exitLevelLine = null;
+                }
             }
         }
 
         // Инициализация графика
         function initChart() {
-            if (chart) return; // Уже создан
+            if (chart) return;
             
-            // Проверяем что библиотека загрузилась
             if (typeof LightweightCharts === 'undefined') {
                 console.error('TradingView библиотека не загружена');
                 return;
@@ -635,40 +1176,47 @@
                     },
                 });
                 
-                // Отслеживаем взаимодействие пользователя с графиком
-                chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
-                    lastUserInteraction = Date.now();
+                let isUserInteracting = false;
+                
+                chartContainer.addEventListener('mousedown', () => {
+                    isUserInteracting = true;
+                });
+                
+                chartContainer.addEventListener('touchstart', () => {
+                    isUserInteracting = true;
+                });
+                
+                chartContainer.addEventListener('wheel', () => {
+                    isUserInteracting = true;
                     autoScroll = false;
                 });
                 
-                // Восстанавливаем автоследование через 10 секунд
-                setInterval(() => {
-                    if (!autoScroll && Date.now() - lastUserInteraction > 10000) {
-                        autoScroll = true;
+                const handleInteractionEnd = () => {
+                    if (isUserInteracting) {
+                        autoScroll = false;
+                        isUserInteracting = false;
                     }
-                }, 1000);
+                };
+                
+                chartContainer.addEventListener('mouseup', handleInteractionEnd);
+                chartContainer.addEventListener('touchend', handleInteractionEnd);
+                chartContainer.addEventListener('mouseleave', handleInteractionEnd);
 
-                // Линия спреда входа (зеленая)
                 entrySpreadSeries = chart.addLineSeries({
                     color: '#10b981',
                     lineWidth: 2,
                     title: 'Спред входа',
                 });
 
-                // Линия спреда выхода (красная)
                 exitSpreadSeries = chart.addLineSeries({
                     color: '#ef4444',
                     lineWidth: 2,
                     title: 'Спред выхода',
                 });
                 
-                // Добавляем горизонтальные линии уровней
                 updateLevelLines();
-                
-                // Включаем перетаскивание линий
                 enableLineDragging();
                 
-                // Адаптивность при изменении размера окна
                 window.addEventListener('resize', () => {
                     if (chart) {
                         chart.applyOptions({ 
@@ -677,31 +1225,26 @@
                     }
                 });
                 
-                // Двойной клик по графику - возврат к последним данным
                 chartContainer.addEventListener('dblclick', () => {
                     if (chart) {
                         autoScroll = true;
-                        chart.timeScale().scrollToRealTime();
+                        chart.timeScale().scrollToPosition(50, true);
                     }
                 });
                 
-                // Загружаем историю
                 loadHistory();
-                
-                console.log('График инициализирован');
             } catch (error) {
                 console.error('Ошибка инициализации графика:', error);
             }
         }
 
-        // Обновление линий уровней на графике
+        // Обновление линий уровней
         function updateLevelLines() {
             if (!entrySpreadSeries || !exitSpreadSeries) return;
             
             const entryLevel = parseFloat(entrySpread.value) || 1.5;
             const exitLevel = parseFloat(exitSpread.value) || 0.5;
             
-            // Удаляем старые линии если есть
             if (entryLevelLine) {
                 entrySpreadSeries.removePriceLine(entryLevelLine);
             }
@@ -709,7 +1252,6 @@
                 exitSpreadSeries.removePriceLine(exitLevelLine);
             }
             
-            // Линия уровня входа (зеленая пунктирная)
             entryLevelLine = entrySpreadSeries.createPriceLine({
                 price: entryLevel,
                 color: '#10b981',
@@ -719,7 +1261,6 @@
                 title: 'Вход ' + entryLevel + '%',
             });
             
-            // Линия уровня выхода (красная пунктирная)
             exitLevelLine = exitSpreadSeries.createPriceLine({
                 price: exitLevel,
                 color: '#ef4444',
@@ -729,7 +1270,6 @@
                 title: 'Выход ' + exitLevel + '%',
             });
             
-            // Нулевая линия (серая)
             entrySpreadSeries.createPriceLine({
                 price: 0,
                 color: '#64748b',
@@ -740,12 +1280,12 @@
             });
         }
         
-        // Функция для перетаскивания линий мышкой
+        // Перетаскивание линий
         function enableLineDragging() {
             if (!chart) return;
             
             let isDragging = false;
-            let dragTarget = null; // 'entry' или 'exit'
+            let dragTarget = null;
             
             const chartElement = document.getElementById('spreadChart');
             
@@ -758,13 +1298,11 @@
                 const entryLevel = parseFloat(entrySpread.value) || 1.5;
                 const exitLevel = parseFloat(exitSpread.value) || 0.5;
                 
-                // Проверяем, близко ли к линии входа (порог 0.1%)
                 if (Math.abs(price - entryLevel) < 0.1) {
                     isDragging = true;
                     dragTarget = 'entry';
                     e.preventDefault();
                 }
-                // Проверяем линию выхода
                 else if (Math.abs(price - exitLevel) < 0.1) {
                     isDragging = true;
                     dragTarget = 'exit';
@@ -780,7 +1318,6 @@
                 
                 if (!price || price < 0) return;
                 
-                // Обновляем значение и линию
                 if (dragTarget === 'entry') {
                     entrySpread.value = price.toFixed(2);
                 } else if (dragTarget === 'exit') {
@@ -802,7 +1339,7 @@
             });
         }
 
-        // Загрузка истории спреда
+        // Загрузка истории
         async function loadHistory() {
             const coin = coinSymbol.value.toUpperCase();
             const short = shortExchange.value;
@@ -826,7 +1363,6 @@
                 
                 if (!history || history.length === 0) return;
                 
-                // Форматируем данные для графика
                 const entryData = history.map(point => ({
                     time: point.time,
                     value: point.entry_spread
@@ -845,11 +1381,11 @@
             }
         }
 
-        // Обновление графика новой точкой
+        // Обновление графика
         function updateChart(entrySpread, exitSpread) {
-            if (!chart) return;
+            if (!chart || !entrySpreadSeries || !exitSpreadSeries) return;
             
-            const timestamp = Date.now() / 1000;
+            const timestamp = Math.floor(Date.now() / 1000);
             
             entrySpreadSeries.update({
                 time: timestamp,
@@ -861,19 +1397,22 @@
                 value: exitSpread
             });
             
-            // Если автоскролл включен - двигаем к последним данным
             if (autoScroll) {
-                chart.timeScale().scrollToRealTime();
+                try {
+                    chart.timeScale().scrollToPosition(50, false);
+                } catch (error) {
+                    console.error('Ошибка автоскролла:', error);
+                }
             }
         }
 
-        // Функция запуска обновления данных
+        // Запуск обновления
         function startUpdating() {
-            updateLiveData(); // Первое обновление сразу
-            updateInterval = setInterval(updateLiveData, 500); // Обновление каждые 500мс
+            updateLiveData();
+            updateInterval = setInterval(updateLiveData, 500);
         }
 
-        // Функция остановки обновления данных
+        // Остановка обновления
         function stopUpdating() {
             if (updateInterval) {
                 clearInterval(updateInterval);
@@ -881,9 +1420,8 @@
             }
         }
 
-        // Функция обновления онлайн данных
+        // Обновление онлайн данных
         async function updateLiveData() {
-            // Проверяем, что все данные заполнены
             const coin = coinSymbol.value.toUpperCase();
             const short = shortExchange.value;
             const long = longExchange.value;
@@ -897,11 +1435,9 @@
                 return;
             }
             
-            // API URL - локальный бэкенд
             const API_URL = 'http://localhost:8000';
             
             try {
-                // Запрос к бэкенду для расчета спреда
                 const response = await fetch(`${API_URL}/api/spread`, {
                     method: 'POST',
                     headers: {
@@ -922,12 +1458,25 @@
                 
                 const data = await response.json();
                 
-                // Обновляем данные на экране
+                // Проверяем статусы бирж
+                let newShortStatus = 'offline';
+                if (data.short && data.short.bid && data.short.ask && data.short.bid > 0 && data.short.ask > 0) {
+                    newShortStatus = 'online';
+                }
+                
+                let newLongStatus = 'offline';
+                if (data.long && data.long.bid && data.long.ask && data.long.bid > 0 && data.long.ask > 0) {
+                    newLongStatus = 'online';
+                }
+                
+                // Обновляем статусы на графике
+                updateChartExchangeStatus('short', short, newShortStatus);
+                updateChartExchangeStatus('long', long, newLongStatus);
+                
                 liveEntrySpread.textContent = data.entry_spread.toFixed(2) + '%';
                 liveExitSpread.textContent = data.exit_spread.toFixed(2) + '%';
                 liveFunding.textContent = data.funding_rate.toFixed(4) + '%';
                 
-                // Обновляем график
                 updateChart(data.entry_spread, data.exit_spread);
                 
             } catch (error) {
@@ -935,16 +1484,35 @@
                 liveEntrySpread.textContent = 'Ошибка';
                 liveExitSpread.textContent = 'Ошибка';
                 liveFunding.textContent = 'Ошибка';
+                
+                // При ошибке помечаем биржи как offline
+                updateChartExchangeStatus('short', short, 'offline');
+                updateChartExchangeStatus('long', long, 'offline');
             }
         }
 
         // Слушатели событий
         toggleOnline.addEventListener('click', toggleOnlineMode);
         coinSymbol.addEventListener('input', calculateProfit);
-        shortExchange.addEventListener('change', calculateProfit);
-        shortType.addEventListener('change', calculateProfit);
-        longExchange.addEventListener('change', calculateProfit);
-        longType.addEventListener('change', calculateProfit);
+        
+        // ИСПРАВЛЕНИЕ: раздельные проверки для short и long
+        shortExchange.addEventListener('change', () => {
+            calculateProfit();
+            scheduleShortCheck();
+        });
+        shortType.addEventListener('change', () => {
+            calculateProfit();
+            scheduleShortCheck();
+        });
+        longExchange.addEventListener('change', () => {
+            calculateProfit();
+            scheduleLongCheck();
+        });
+        longType.addEventListener('change', () => {
+            calculateProfit();
+            scheduleLongCheck();
+        });
+        
         entrySpread.addEventListener('input', () => {
             calculateProfit();
             updateLevelLines();
@@ -973,7 +1541,6 @@
                     expectedProfit: (parseFloat(entrySpread.value) - parseFloat(exitSpread.value)).toFixed(2)
                 };
                 
-                // Отправка данных боту
                 tg.sendData(JSON.stringify(data));
             });
         }
