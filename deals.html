@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Сделки - Крипто Арбитраж</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #0f172a);
+            padding-bottom: 84px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 16px 24px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 0 16px;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #64748b);
+            max-width: 520px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 136, 204, 0.12);
+            color: var(--tg-theme-button-color, #0088cc);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: #ffffff;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-muted {
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+            color: var(--tg-theme-hint-color, #64748b);
+        }
+
+        .btn-danger {
+            background: rgba(220, 38, 38, 0.12);
+            color: #dc2626;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .page-feedback {
+            display: none;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .page-feedback.success {
+            background: rgba(34, 197, 94, 0.12);
+            color: #15803d;
+        }
+
+        .page-feedback.error {
+            background: rgba(248, 113, 113, 0.15);
+            color: #b91c1c;
+        }
+
+        .placeholder {
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #64748b);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .placeholder .emoji {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .trades-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .trade-card {
+            background: var(--tg-theme-secondary-bg-color, #f8fafc);
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .trade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .trade-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .trade-subtitle {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #64748b);
+            line-height: 1.3;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .status-badge.status-reserved {
+            background: rgba(245, 158, 11, 0.12);
+            color: #b45309;
+        }
+
+        .status-badge.status-open {
+            background: rgba(34, 197, 94, 0.15);
+            color: #047857;
+        }
+
+        .status-badge.status-closed {
+            background: rgba(59, 130, 246, 0.15);
+            color: #1d4ed8;
+        }
+
+        .status-detail {
+            margin-top: 0;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .status-detail.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: #92400e;
+        }
+
+        .status-detail.info {
+            background: rgba(59, 130, 246, 0.15);
+            color: #1d4ed8;
+        }
+
+        .trade-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .trade-overview {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(148, 163, 184, 0.1);
+        }
+
+        .trade-positions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .position-card {
+            background: rgba(15, 23, 42, 0.04);
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .position-card.short-position {
+            border-left: 4px solid rgba(220, 38, 38, 0.4);
+        }
+
+        .position-card.long-position {
+            border-left: 4px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #0f172a);
+        }
+
+        .position-title {
+            font-size: 12px;
+        }
+
+        .position-exchange {
+            color: var(--tg-theme-hint-color, #64748b);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .position-table {
+            display: grid;
+            gap: 6px;
+        }
+
+        .position-table-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .position-table-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .position-table-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--tg-theme-hint-color, #94a3b8);
+            font-weight: 600;
+        }
+
+        .position-table-value {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #0f172a);
+        }
+
+        .position-table-value.muted {
+            color: var(--tg-theme-hint-color, #94a3b8);
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 12px;
+        }
+
+        .metric-label {
+            color: var(--tg-theme-hint-color, #64748b);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-size: 11px;
+        }
+
+        .metric-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #0f172a);
+        }
+
+        .metric-value.muted {
+            color: var(--tg-theme-hint-color, #94a3b8);
+        }
+
+        .metric-empty {
+            visibility: hidden;
+        }
+
+        .trade-notes {
+            margin-top: 6px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--tg-theme-text-color, #0f172a);
+            background: rgba(148, 163, 184, 0.12);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .metric-pair {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .trade-live {
+            margin-top: 0;
+            font-size: 11px;
+            background: rgba(59, 130, 246, 0.08);
+            border-radius: 10px;
+            padding: 8px 10px;
+            color: var(--tg-theme-text-color, #0f172a);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .trade-live span {
+            font-weight: 500;
+        }
+
+        .live-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #6b7280;
+            margin-right: 6px;
+            animation: none;
+            display: inline-block;
+        }
+
+        .live-indicator.online {
+            background-color: #22c55e;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .trade-chart-section {
+            margin-top: 0;
+        }
+
+        .trade-header-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .trade-header-actions .btn {
+            font-size: 12px;
+            padding: 6px 10px;
+            margin: 0;
+        }
+
+        .trade-chart-container {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+        }
+
+        .trade-chart-container.active {
+            display: block;
+        }
+
+        .trade-chart-wrapper {
+            width: 100%;
+            height: 240px;
+        }
+
+        .trade-chart-empty {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #64748b);
+            text-align: center;
+            padding: 12px 0;
+        }
+
+        .trade-actions-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .trade-edit-form {
+            display: none;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .trade-edit-form.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        @media (min-width: 680px) {
+            .form-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .form-field label {
+            font-weight: 600;
+            color: var(--tg-theme-hint-color, #475569);
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: var(--tg-theme-bg-color, #ffffff);
+            font-size: 14px;
+            color: var(--tg-theme-text-color, #0f172a);
+        }
+
+        .form-field textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .nav-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-top: 1px solid var(--tg-theme-hint-color, #ddd);
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-tabs {
+            padding: 10px 12px;
+            gap: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-tabs {
+                padding: 12px 16px;
+                gap: 8px;
+            }
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 8px 10px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--tg-theme-hint-color, #999);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-tab {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+
+        .nav-tab.active {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: #ffffff;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-icon {
+                font-size: 20px;
+            }
+        }
+
+        .nav-label {
+            font-size: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-label {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <div>
+                <h1>Сделки</h1>
+                <p>Следите за статусом арбитражных стратегий: обновляйте параметры, закрывайте сделки и очищайте историю.</p>
+            </div>
+            <button id="refreshTrades" type="button" class="btn btn-secondary">Обновить</button>
+        </header>
+
+        <div id="pageFeedback" class="page-feedback"></div>
+
+        <div id="loadingState" class="placeholder">Загрузка сделок...</div>
+
+        <div id="emptyState" class="placeholder" style="display: none;">
+            <span class="emoji">🗂️</span>
+            <p>Сделок пока нет. Создайте первую на странице «Стратегия», нажав кнопку «Торговать».</p>
+        </div>
+
+        <div id="tradesList" class="trades-list"></div>
+    </div>
+
+    <div class="nav-tabs">
+        <a href="index.html" class="nav-tab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Стратегия</span>
+        </a>
+        <a href="deals.html" class="nav-tab active">
+            <span class="nav-icon">📑</span>
+            <span class="nav-label">Сделки</span>
+        </a>
+        <a href="account.html" class="nav-tab">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Аккаунт</span>
+        </a>
+    </div>
+
+    <script>
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
+
+        const API_URL = 'http://localhost:8000';
+        const STATUS_LABELS = {
+            reserved: 'Зарезервирована',
+            open: 'Открыта',
+            closed: 'Закрыта'
+        };
+        const STATUS_ICONS = {
+            reserved: '⏳',
+            open: '🟢',
+            closed: '✅'
+        };
+        const tradeCharts = new Map();
+        const MAX_CHART_POINTS = 300;
+
+        function resizeAllCharts() {
+            tradeCharts.forEach((state, tradeId) => {
+                const { chart, wrapper, autoScroll } = state;
+                if (chart && wrapper) {
+                    chart.applyOptions({ width: wrapper.clientWidth });
+                    const shouldAutoScroll = autoScroll === true || autoScroll === 'auto';
+                    if (shouldAutoScroll) {
+                        try {
+                            chart.timeScale().scrollToPosition(0, false);
+                        } catch (error) {
+                            console.warn(`Ошибка автоскролла при ресайзе графика сделки ${tradeId}:`, error);
+                        }
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('resize', resizeAllCharts);
+
+        const tradesList = document.getElementById('tradesList');
+        const loadingState = document.getElementById('loadingState');
+        const emptyState = document.getElementById('emptyState');
+        const feedback = document.getElementById('pageFeedback');
+        const refreshBtn = document.getElementById('refreshTrades');
+
+        let feedbackTimer = null;
+        let isFetchingTrades = false;
+        let liveUpdateHandle = null;
+        let liveUpdateInProgress = false;
+
+        function showFeedback(type, message) {
+            if (!feedback) return;
+            feedback.className = `page-feedback ${type === 'error' ? 'error' : 'success'}`;
+            feedback.textContent = message;
+            feedback.style.display = 'block';
+
+            if (feedbackTimer) {
+                clearTimeout(feedbackTimer);
+            }
+            feedbackTimer = setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 4000);
+        }
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatExchangeName(exchange) {
+            const names = {
+                'binance': 'Binance',
+                'bybit': 'Bybit',
+                'okx': 'OKX',
+                'gateio': 'Gate.io',
+                'kucoin': 'KuCoin',
+                'mexc': 'MEXC',
+                'bitget': 'Bitget',
+                'htx': 'HTX',
+                'bingx': 'BingX',
+                'coinex': 'CoinEx',
+                'xt': 'XT',
+                'lbank': 'LBank',
+                'bitmart': 'BitMart',
+                'bitmex': 'Bitmex',
+                'hyperliquid': 'HyperLiquid',
+                'ourbit': 'Ourbit'
+            };
+            return names[exchange] || (exchange ? exchange.toUpperCase() : '—');
+        }
+
+        function formatType(value) {
+            if (!value) return '—';
+            return value === 'spot' ? 'Спот' : value === 'futures' ? 'Фьючерс' : value;
+        }
+
+        function formatPercent(value, digits = 2) {
+            if (value === null || value === undefined || Number.isNaN(value)) {
+                return '—';
+            }
+            const factor = Number(value);
+            if (!Number.isFinite(factor)) {
+                return '—';
+            }
+            return `${factor.toFixed(digits)}%`;
+        }
+
+        function formatPrice(value, digits = 2) {
+            if (value === null || value === undefined || Number.isNaN(value)) {
+                return '—';
+            }
+            const num = Number(value);
+            if (!Number.isFinite(num)) {
+                return '—';
+            }
+            return num.toFixed(digits);
+        }
+
+        function formatCurrency(value, digits = 2) {
+            if (value === null || value === undefined || value === '' || value === '—' || Number.isNaN(value)) {
+                return '—';
+            }
+            const num = Number(value);
+            if (!Number.isFinite(num)) {
+                return '—';
+            }
+            return `${num.toFixed(digits)} USDT`;
+        }
+
+        function formatDate(value) {
+            if (!value) return '—';
+            try {
+                const date = new Date(value);
+                if (Number.isNaN(date.getTime())) {
+                    return '—';
+                }
+                return date.toLocaleString('ru-RU', {
+                    hour12: false
+                });
+            } catch (error) {
+                return '—';
+            }
+        }
+
+        function createMetric(label, value, options = {}) {
+            const displayValue = (value === undefined || value === null || value === '') ? '—' : value;
+            const isMuted = displayValue === '—';
+            const classes = ['metric'];
+            if (options.empty) {
+                classes.push('metric-empty');
+            }
+            return `
+                <div class="${classes.join(' ')}">
+                    <span class="metric-label">${label || '&nbsp;'}</span>
+                    <span class="metric-value${isMuted ? ' muted' : ''}">${displayValue}</span>
+                </div>
+            `;
+        }
+
+        function createMetricPair(labelA, valueA, labelB = null, valueB = null) {
+            return `
+                <div class="metric-pair">
+                    ${createMetric(labelA, valueA)}
+                    ${labelB ? createMetric(labelB, valueB) : createMetric('', '', { empty: true })}
+                </div>
+            `;
+        }
+
+        function disposeTradeCharts() {
+            tradeCharts.forEach(({ chart }) => {
+                try {
+                    chart.remove();
+                } catch (error) {
+                    console.warn('Ошибка удаления графика сделки:', error);
+                }
+            });
+            tradeCharts.clear();
+        }
+
+        async function ensureTradeChart(card) {
+            const tradeId = card.dataset.tradeId;
+            if (!tradeId) {
+                return;
+            }
+
+            const container = card.querySelector('.trade-chart-container');
+            const wrapper = card.querySelector('.trade-chart-wrapper');
+            const emptyEl = card.querySelector('.trade-chart-empty');
+            if (!container || !wrapper) {
+                return;
+            }
+
+            const existing = tradeCharts.get(tradeId);
+            if (existing) {
+                existing.wrapper = wrapper;
+                existing.container = container;
+                existing.chart.applyOptions({ width: wrapper.clientWidth });
+                try {
+                    existing.chart.timeScale().fitContent();
+                } catch (error) {
+                    console.warn(`Ошибка подгонки масштаба графика сделки ${tradeId}:`, error);
+                }
+                if (emptyEl) {
+                    emptyEl.style.display = existing.hasData ? 'none' : 'block';
+                }
+                return;
+            }
+
+            if (typeof LightweightCharts === 'undefined') {
+                console.error('LightweightCharts не загружен');
+                if (emptyEl) {
+                    emptyEl.textContent = '⚠️ Библиотека графиков не загружена';
+                    emptyEl.style.display = 'block';
+                }
+                return;
+            }
+
+            const chart = LightweightCharts.createChart(wrapper, {
+                width: wrapper.clientWidth,
+                height: 240,
+                layout: {
+                    background: { color: '#0f172a' },
+                    textColor: '#e2e8f0',
+                },
+                grid: {
+                    vertLines: { color: '#1e293b' },
+                    horzLines: { color: '#1e293b' },
+                },
+                timeScale: {
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+                rightPriceScale: {
+                    visible: true,
+                },
+                leftPriceScale: {
+                    visible: false,
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+            });
+
+            const entrySeries = chart.addLineSeries({
+                color: '#22c55e',
+                lineWidth: 1,
+                title: 'Вход',
+            });
+            const exitSeries = chart.addLineSeries({
+                color: '#ef4444',
+                lineWidth: 1,
+                title: 'Выход',
+            });
+
+            const entryTarget = Number(card.dataset.entryTarget);
+            const exitTarget = Number(card.dataset.exitTarget);
+
+            const entryLineOptions = Number.isFinite(entryTarget)
+                ? {
+                      price: entryTarget,
+                      color: '#22c55e',
+                      lineWidth: 1,
+                      lineStyle: LightweightCharts.LineStyle.Dashed,
+                      axisLabelVisible: true,
+                      title: `Цель входа ${entryTarget.toFixed(2)}%`,
+                  }
+                : null;
+
+            const exitLineOptions = Number.isFinite(exitTarget)
+                ? {
+                      price: exitTarget,
+                      color: '#ef4444',
+                      lineWidth: 1,
+                      lineStyle: LightweightCharts.LineStyle.Dashed,
+                      axisLabelVisible: true,
+                      title: `Цель выхода ${exitTarget.toFixed(2)}%`,
+                  }
+                : null;
+
+            if (entryLineOptions) {
+                entrySeries.createPriceLine(entryLineOptions);
+            }
+            if (exitLineOptions) {
+                exitSeries.createPriceLine(exitLineOptions);
+            }
+
+            let hasData = false;
+            let pointsEntry = [];
+            let pointsExit = [];
+            try {
+                const params = new URLSearchParams({
+                    coin: card.dataset.coin || '',
+                    short_exchange: card.dataset.shortExchange || '',
+                    short_type: card.dataset.shortType || 'futures',
+                    long_exchange: card.dataset.longExchange || '',
+                    long_type: card.dataset.longType || 'futures',
+                    limit: '200',
+                });
+                const response = await fetch(`${API_URL}/api/spread/history?${params.toString()}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const result = await response.json();
+                const history = Array.isArray(result.data) ? result.data : [];
+
+                if (history.length) {
+                    const entryData = history
+                        .map(point => ({
+                            time: Math.round(Number(point.time)),
+                            value: Number(point.entry_spread),
+                        }))
+                        .filter(item => Number.isFinite(item.time) && Number.isFinite(item.value));
+                    const exitData = history
+                        .map(point => ({
+                            time: Math.round(Number(point.time)),
+                            value: Number(point.exit_spread),
+                        }))
+                        .filter(item => Number.isFinite(item.time) && Number.isFinite(item.value));
+
+                    if (entryData.length) {
+                        pointsEntry = entryData.slice(-MAX_CHART_POINTS);
+                        entrySeries.setData(pointsEntry);
+                    }
+                    if (exitData.length) {
+                        pointsExit = exitData.slice(-MAX_CHART_POINTS);
+                        exitSeries.setData(pointsExit);
+                    }
+
+                    if (entryData.length || exitData.length) {
+                        chart.timeScale().fitContent();
+                        hasData = true;
+                    }
+                }
+            } catch (error) {
+                console.error(`Ошибка загрузки истории для сделки ${tradeId}:`, error);
+            }
+
+            if (!hasData) {
+                const fallbackEntry = Number.isFinite(entryTarget) ? entryTarget : 0;
+                const fallbackExit = Number.isFinite(exitTarget) ? exitTarget : fallbackEntry;
+                const now = Math.floor(Date.now() / 1000);
+                pointsEntry = [{ time: now, value: fallbackEntry }];
+                pointsExit = [{ time: now, value: fallbackExit }];
+                entrySeries.setData(pointsEntry);
+                exitSeries.setData(pointsExit);
+                chart.timeScale().fitContent();
+                if (emptyEl) {
+                    emptyEl.textContent = 'Недостаточно истории, показаны целевые уровни.';
+                    emptyEl.style.display = 'block';
+                }
+            } else if (emptyEl) {
+                emptyEl.style.display = 'none';
+            }
+
+            tradeCharts.set(tradeId, {
+                chart,
+                entrySeries,
+                exitSeries,
+                wrapper,
+                container,
+                hasData,
+                pointsEntry,
+                pointsExit,
+                autoScroll: 'auto',
+                zeroLine: entrySeries.createPriceLine({
+                    price: 0,
+                    color: '#94a3b8',
+                    lineWidth: 1,
+                    lineStyle: LightweightCharts.LineStyle.Dotted,
+                    axisLabelVisible: false,
+                    title: '',
+                }),
+            });
+            wrapper.addEventListener('wheel', () => {
+                const state = tradeCharts.get(tradeId);
+                if (state) {
+                    state.autoScroll = 'manual';
+                }
+            }, { passive: true });
+            wrapper.addEventListener('mousedown', () => {
+                const state = tradeCharts.get(tradeId);
+                if (state) {
+                    state.autoScroll = 'manual';
+                }
+            });
+            wrapper.addEventListener('touchstart', () => {
+                const state = tradeCharts.get(tradeId);
+                if (state) {
+                    state.autoScroll = 'manual';
+                }
+            }, { passive: true });
+            wrapper.addEventListener('dblclick', () => {
+                const state = tradeCharts.get(tradeId);
+                if (state) {
+                    state.autoScroll = 'manualCenter';
+                    try {
+                        state.chart.timeScale().scrollToPosition(90, true);
+                    } catch (error) {
+                        console.warn(`Ошибка автоскролла графика сделки ${tradeId}:`, error);
+                    }
+                }
+            });
+            resizeAllCharts();
+        }
+
+        function updateTradeChartSeries(card, entryValue, exitValue) {
+            const tradeId = card.dataset.tradeId;
+            const state = tradeCharts.get(tradeId);
+            if (
+                !state ||
+                !Number.isFinite(entryValue) ||
+                !Number.isFinite(exitValue)
+            ) {
+                return;
+            }
+
+            const time = Math.floor(Date.now() / 1000);
+            state.pointsEntry.push({ time, value: entryValue });
+            state.pointsExit.push({ time, value: exitValue });
+
+            if (state.pointsEntry.length > MAX_CHART_POINTS) {
+                state.pointsEntry.splice(0, state.pointsEntry.length - MAX_CHART_POINTS);
+            }
+            if (state.pointsExit.length > MAX_CHART_POINTS) {
+                state.pointsExit.splice(0, state.pointsExit.length - MAX_CHART_POINTS);
+            }
+
+            state.entrySeries.setData(state.pointsEntry);
+            state.exitSeries.setData(state.pointsExit);
+            state.hasData = true;
+
+            const shouldAutoScroll = state.autoScroll === true || state.autoScroll === 'auto';
+            if (shouldAutoScroll) {
+                try {
+                    state.chart.timeScale().scrollToPosition(0, false);
+                } catch (error) {
+                    console.warn(`Ошибка прокрутки графика сделки ${tradeId}:`, error);
+                }
+            }
+
+            const emptyEl = card.querySelector('.trade-chart-empty');
+            if (emptyEl) {
+                emptyEl.style.display = 'none';
+            }
+        }
+
+        async function toggleChartForCard(card, button) {
+            const container = card.querySelector('.trade-chart-container');
+            if (!container) {
+                return;
+            }
+
+            const isActive = container.classList.contains('active');
+            if (isActive) {
+                container.classList.remove('active');
+                if (button) {
+                    button.textContent = 'Показать график';
+                }
+                return;
+            }
+
+            container.classList.add('active');
+            const originalText = button ? button.textContent : '';
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Загрузка...';
+            }
+
+            try {
+                await ensureTradeChart(card);
+                if (button) {
+                    button.textContent = 'Скрыть график';
+                }
+            } catch (error) {
+                console.error('Ошибка отображения графика сделки:', error);
+                container.classList.remove('active');
+                if (button) {
+                    button.textContent = originalText || 'Показать график';
+                }
+                showFeedback('error', 'Не удалось построить график сделки');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    if (!container.classList.contains('active')) {
+                        button.textContent = originalText || 'Показать график';
+                    }
+                }
+            }
+        }
+
+        function stopLiveUpdates() {
+            if (liveUpdateHandle) {
+                clearInterval(liveUpdateHandle);
+                liveUpdateHandle = null;
+            }
+            liveUpdateInProgress = false;
+        }
+
+        async function updateLiveMetricsForCard(card) {
+            const coin = card.dataset.coin;
+            const shortExchange = card.dataset.shortExchange;
+            const shortType = card.dataset.shortType || 'futures';
+            const longExchange = card.dataset.longExchange;
+            const longType = card.dataset.longType || 'futures';
+
+            if (!coin || !shortExchange || !longExchange) {
+                return;
+            }
+
+            const entryEl = card.querySelector('.live-entry');
+            const exitEl = card.querySelector('.live-exit');
+            const fundingEl = card.querySelector('.live-funding');
+            const indicatorEl = card.querySelector('.live-indicator');
+            try {
+                const response = await fetch(`${API_URL}/api/spread`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        coin,
+                        short_exchange: shortExchange,
+                        short_type: shortType,
+                        long_exchange: longExchange,
+                        long_type: longType
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const entryValue = Number(data.entry_spread);
+                const exitValue = Number(data.exit_spread);
+                const entry = formatPercent(entryValue);
+                const exit = formatPercent(exitValue);
+                const fundingRate = formatPercent(data.funding_rate, 4);
+                const shortFunding = data.short && data.short.funding !== undefined && data.short.funding !== null
+                    ? formatPercent(data.short.funding, 4)
+                    : '—';
+                const longFunding = data.long && data.long.funding !== undefined && data.long.funding !== null
+                    ? formatPercent(data.long.funding, 4)
+                    : '—';
+
+                if (indicatorEl) indicatorEl.classList.add('online');
+                if (entryEl) entryEl.textContent = `Вход: ${entry}`;
+                if (exitEl) exitEl.textContent = `Выход: ${exit}`;
+                if (fundingEl) fundingEl.textContent = `Фандинг: ${fundingRate} (Ш: ${shortFunding} | Л: ${longFunding})`;
+                updateTradeChartSeries(card, entryValue, exitValue);
+
+            } catch (error) {
+                if (indicatorEl) indicatorEl.classList.remove('online');
+                if (entryEl) entryEl.textContent = 'Вход: —';
+                if (exitEl) exitEl.textContent = 'Выход: —';
+                if (fundingEl) fundingEl.textContent = 'Фандинг: —';
+
+            }
+        }
+
+        async function startLiveUpdates() {
+            stopLiveUpdates();
+            const cards = Array.from(document.querySelectorAll('.trade-card'));
+            if (!cards.length) {
+                return;
+            }
+
+            const tick = async () => {
+                if (liveUpdateInProgress) {
+                    return;
+                }
+                liveUpdateInProgress = true;
+                try {
+                    const activeCards = cards.filter(card => document.body.contains(card));
+                    for (const card of activeCards) {
+                        await updateLiveMetricsForCard(card);
+                    }
+                } finally {
+                    liveUpdateInProgress = false;
+                }
+            };
+
+            await tick();
+            liveUpdateHandle = setInterval(tick, 3000);
+        }
+
+        function buildStatusBadge(status) {
+            const key = status || 'reserved';
+            const label = STATUS_LABELS[key] || key;
+            const icon = STATUS_ICONS[key] || '';
+            return `<span class="status-badge status-${key}">${icon} ${label}</span>`;
+        }
+
+        function buildTradeCard(trade) {
+            const status = trade.status || 'reserved';
+            const entryPercent = formatPercent(trade.entry_spread);
+            const exitPercent = formatPercent(trade.exit_spread);
+            const expectedPercent = formatPercent(trade.expected_profit);
+            const actualEntryPercent = formatPercent(trade.actual_entry_spread);
+            const actualExitPercent = formatPercent(trade.actual_exit_spread);
+            const entryPrice = formatPrice(trade.entry_price, 4);
+            const exitPrice = formatPrice(trade.exit_price, 4);
+            const shortEntryPrice = formatPrice(trade.short_entry_price ?? trade.entry_price, 4);
+            const shortExitPrice = formatPrice(trade.short_exit_price, 4);
+            const longEntryPrice = formatPrice(trade.long_entry_price ?? trade.entry_price, 4);
+            const longExitPrice = formatPrice(trade.long_exit_price ?? trade.exit_price, 4);
+            const positionSize = trade.position_size ? Number(trade.position_size).toFixed(6) : '—';
+            const shortOrder = trade.short_order_id ? escapeHtml(trade.short_order_id) : '—';
+            const longOrder = trade.long_order_id ? escapeHtml(trade.long_order_id) : '—';
+            const shortExitOrder = trade.short_exit_order_id ? escapeHtml(trade.short_exit_order_id) : '—';
+            const longExitOrder = trade.long_exit_order_id ? escapeHtml(trade.long_exit_order_id) : '—';
+            const openedAt = formatDate(trade.opened_at);
+            const closedAt = formatDate(trade.closed_at);
+            const shortEntryAt = formatDate(trade.short_entry_time || trade.opened_at);
+            const shortExitAt = formatDate(trade.short_exit_time || trade.closed_at);
+            const longEntryAt = formatDate(trade.long_entry_time || trade.opened_at);
+            const longExitAt = formatDate(trade.long_exit_time || trade.closed_at);
+            const shortMargin = trade.short_margin ?? trade.margin ?? null;
+            const longMargin = trade.long_margin ?? trade.margin ?? null;
+            const shortRealized = trade.short_realized_pnl ?? trade.realized_pnl ?? null;
+            const longRealized = trade.long_realized_pnl ?? trade.realized_pnl ?? null;
+            const shortUnrealized = trade.short_unrealized_pnl ?? trade.unrealized_pnl ?? null;
+            const longUnrealized = trade.long_unrealized_pnl ?? trade.unrealized_pnl ?? null;
+            const noteText = trade.notes || '';
+            const hasLiveNote = typeof noteText === 'string' && /live\s+entry/i.test(noteText);
+            const notes = noteText && !hasLiveNote ? `<div class="trade-notes">${escapeHtml(noteText)}</div>` : '';
+            const detailClass = status === 'reserved' ? 'status-detail warning' : 'status-detail info';
+            const statusDetailIsLive = trade.status_detail && /спред/i.test(trade.status_detail || '');
+            const statusDetail = trade.status_detail
+                ? `<div class="${detailClass}${statusDetailIsLive ? ' live-summary' : ''}"${statusDetailIsLive ? ' data-live-summary="true"' : ''}>${escapeHtml(trade.status_detail)}</div>`
+                : '';
+
+            return `
+                <div class="trade-card"
+                    data-trade-id="${trade.id}"
+                    data-coin="${escapeHtml((trade.coin || '').toUpperCase())}"
+                    data-short-exchange="${escapeHtml(trade.short_exchange || '')}"
+                    data-short-type="${escapeHtml(trade.short_type || '')}"
+                    data-long-exchange="${escapeHtml(trade.long_exchange || '')}"
+                    data-long-type="${escapeHtml(trade.long_type || '')}"
+                    data-entry-target="${trade.entry_spread ?? ''}"
+                    data-exit-target="${trade.exit_spread ?? ''}">
+                    <div class="trade-header">
+                        <div>
+                            <div class="trade-title">${trade.coin ?? '—'}</div>
+                            <div class="trade-subtitle">
+                                SHORT · ${formatExchangeName(trade.short_exchange)} (${formatType(trade.short_type)})<br>
+                                LONG · ${formatExchangeName(trade.long_exchange)} (${formatType(trade.long_type)})
+                            </div>
+                        </div>
+                        <div class="trade-header-actions">
+                            ${buildStatusBadge(status)}
+                            <button type="button" class="btn btn-muted btn-toggle-chart" data-trade-id="${trade.id}">Показать график</button>
+                        </div>
+                    </div>
+
+                    <div class="trade-body">
+                        <div class="trade-chart-section">
+                            <div class="trade-chart-container" data-trade-id="${trade.id}">
+                                <div class="trade-chart-wrapper" id="trade-chart-${trade.id}"></div>
+                                <div class="trade-chart-empty">Загрузка данных...</div>
+                            </div>
+                        </div>
+                        ${statusDetail}
+                        <div class="trade-live" id="live-${trade.id}">
+                            <span class="live-indicator"></span>
+                            <span class="live-entry">Вход: —</span>
+                            <span class="live-exit">Выход: —</span>
+                            <span class="live-funding">Фандинг: —</span>
+                        </div>
+                        <div class="trade-overview">
+                            ${createMetricPair('Спред входа', entryPercent, 'Факт. спред входа', actualEntryPercent)}
+                            ${createMetricPair('Спред выхода', exitPercent, 'Факт. спред выхода', actualExitPercent)}
+                            ${createMetricPair('Ожидаемая прибыль', expectedPercent, 'Размер позиции', positionSize)}
+                            ${createMetricPair('Открыта', openedAt, 'Закрыта', closedAt)}
+                        </div>
+
+                        <div class="trade-positions">
+                            <div class="position-card short-position">
+                                <div class="position-header">
+                                    <span class="position-title">🔴 Шорт</span>
+                                    <span class="position-exchange">${formatExchangeName(trade.short_exchange)} · ${formatType(trade.short_type)}</span>
+                                </div>
+                                <div class="position-table">
+                                    ${createLegRow('Вход · цена', shortEntryPrice, 'Выход · цена', shortExitPrice)}
+                                    ${createLegRow('Вход · время', shortEntryAt, 'Выход · время', shortExitAt)}
+                                    ${createLegRow('Вход · ордер', shortOrder, 'Выход · ордер', shortExitOrder)}
+                                    ${createLegRow('Объём', positionSize, 'Маржа', formatCurrency(shortMargin))}
+                                    ${createLegRow('Реал. PnL', formatCurrency(shortRealized, 4), 'Нереал. PnL', formatCurrency(shortUnrealized, 4))}
+                                </div>
+                            </div>
+                            <div class="position-card long-position">
+                                <div class="position-header">
+                                    <span class="position-title">🟢 Лонг</span>
+                                    <span class="position-exchange">${formatExchangeName(trade.long_exchange)} · ${formatType(trade.long_type)}</span>
+                                </div>
+                                <div class="position-table">
+                                    ${createLegRow('Вход · цена', longEntryPrice, 'Выход · цена', longExitPrice)}
+                                    ${createLegRow('Вход · время', longEntryAt, 'Выход · время', longExitAt)}
+                                    ${createLegRow('Вход · ордер', longOrder, 'Выход · ордер', longExitOrder)}
+                                    ${createLegRow('Объём', positionSize, 'Маржа', formatCurrency(longMargin))}
+                                    ${createLegRow('Реал. PnL', formatCurrency(longRealized, 4), 'Нереал. PnL', formatCurrency(longUnrealized, 4))}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        ${notes}
+                    </div>
+
+                    <div class="trade-actions-row">
+                        <button type="button" class="btn btn-secondary btn-toggle-edit" data-trade-id="${trade.id}">Редактировать</button>
+                        <button type="button" class="btn btn-danger btn-delete-trade" data-trade-id="${trade.id}">Удалить</button>
+                    </div>
+
+                    <form class="trade-edit-form" data-trade-id="${trade.id}">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="entry-${trade.id}">Спред входа (%)</label>
+                                <input id="entry-${trade.id}" name="entry_spread" type="number" step="0.01" value="${trade.entry_spread ?? ''}">
+                            </div>
+                            <div class="form-field">
+                                <label for="exit-${trade.id}">Спред выхода (%)</label>
+                                <input id="exit-${trade.id}" name="exit_spread" type="number" step="0.01" value="${trade.exit_spread ?? ''}">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Сохранить</button>
+                            <button type="button" class="btn btn-muted btn-cancel-edit">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function formatTableValue(value) {
+            const display = value === null || value === undefined || value === '—' || value === '' ? '—' : value;
+            const muted = display === '—';
+            return `<span class="position-table-value${muted ? ' muted' : ''}">${display}</span>`;
+        }
+
+        function createLegRow(entryLabel, entryValue, exitLabel, exitValue) {
+            return `
+                <div class="position-table-row">
+                    <div class="position-table-cell">
+                        <span class="position-table-label">${entryLabel}</span>
+                        ${formatTableValue(entryValue)}
+                    </div>
+                    <div class="position-table-cell">
+                        <span class="position-table-label">${exitLabel}</span>
+                        ${formatTableValue(exitValue)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTrades(trades) {
+            disposeTradeCharts();
+            if (!Array.isArray(trades) || trades.length === 0) {
+                tradesList.innerHTML = '';
+                loadingState.style.display = 'none';
+                emptyState.style.display = 'block';
+                stopLiveUpdates();
+                return;
+            }
+
+            const cardsHtml = trades.map(buildTradeCard).join('');
+            tradesList.innerHTML = cardsHtml;
+            loadingState.style.display = 'none';
+            emptyState.style.display = 'none';
+            startLiveUpdates();
+        }
+
+        async function loadTrades(showSuccess = false) {
+            if (isFetchingTrades) return;
+            isFetchingTrades = true;
+
+            loadingState.textContent = 'Загрузка сделок...';
+            loadingState.style.display = 'block';
+            emptyState.style.display = 'none';
+            tradesList.innerHTML = '';
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+            }
+            stopLiveUpdates();
+            disposeTradeCharts();
+
+            try {
+                const response = await fetch(`${API_URL}/api/trades`);
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.detail || 'Не удалось загрузить сделки');
+                }
+
+                const trades = await response.json();
+                renderTrades(trades);
+                if (showSuccess) {
+                    showFeedback('success', 'Список сделок обновлен');
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки сделок:', error);
+                loadingState.textContent = 'Не удалось загрузить сделки. Проверьте соединение и попробуйте снова.';
+                showFeedback('error', error.message || 'Ошибка загрузки сделок');
+            } finally {
+                isFetchingTrades = false;
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                }
+            }
+        }
+
+        async function updateTrade(tradeId, payload, submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Сохранение...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/trades/${tradeId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.detail || 'Не удалось обновить сделку');
+                }
+
+                showFeedback('success', 'Сделка обновлена');
+                await loadTrades();
+            } catch (error) {
+                console.error('Ошибка обновления сделки:', error);
+                showFeedback('error', error.message || 'Ошибка при сохранении изменений');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Сохранить';
+            }
+        }
+
+        async function deleteTrade(tradeId, deleteButton) {
+            const confirmed = confirm(`Удалить сделку №${tradeId}?`);
+            if (!confirmed) {
+                return;
+            }
+
+            deleteButton.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/api/trades/${tradeId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.detail || 'Не удалось удалить сделку');
+                }
+
+                showFeedback('success', `Сделка №${tradeId} удалена`);
+                await loadTrades();
+            } catch (error) {
+                console.error('Ошибка удаления сделки:', error);
+                showFeedback('error', error.message || 'Ошибка при удалении сделки');
+            } finally {
+                deleteButton.disabled = false;
+            }
+        }
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => loadTrades(true));
+        }
+
+        document.addEventListener('click', (event) => {
+            const chartBtn = event.target.closest('.btn-toggle-chart');
+            if (chartBtn) {
+                const card = chartBtn.closest('.trade-card');
+                if (!card) return;
+                toggleChartForCard(card, chartBtn);
+                return;
+            }
+
+            const toggleBtn = event.target.closest('.btn-toggle-edit');
+            if (toggleBtn) {
+                const card = toggleBtn.closest('.trade-card');
+                if (!card) return;
+                const form = card.querySelector('.trade-edit-form');
+                if (!form) return;
+
+                const isActive = form.classList.toggle('active');
+                toggleBtn.textContent = isActive ? 'Свернуть' : 'Редактировать';
+                return;
+            }
+
+            const cancelBtn = event.target.closest('.btn-cancel-edit');
+            if (cancelBtn) {
+                const form = cancelBtn.closest('.trade-edit-form');
+                if (form) {
+                    form.classList.remove('active');
+                    const toggle = form.parentElement.querySelector('.btn-toggle-edit');
+                    if (toggle) {
+                        toggle.textContent = 'Редактировать';
+                    }
+                }
+                return;
+            }
+
+            const deleteBtn = event.target.closest('.btn-delete-trade');
+            if (deleteBtn) {
+                const tradeId = deleteBtn.dataset.tradeId;
+                if (tradeId) {
+                    deleteTrade(tradeId, deleteBtn);
+                }
+            }
+        });
+
+        document.addEventListener('submit', (event) => {
+            if (!event.target.classList.contains('trade-edit-form')) return;
+            event.preventDefault();
+
+            const form = event.target;
+            const tradeId = form.dataset.tradeId;
+            if (!tradeId) return;
+
+            const formData = new FormData(form);
+
+            const payload = {};
+
+            const entrySpread = parseFloat(formData.get('entry_spread'));
+            if (!Number.isNaN(entrySpread)) {
+                payload.entry_spread = Number(entrySpread.toFixed(4));
+            }
+
+            const exitSpread = parseFloat(formData.get('exit_spread'));
+            if (!Number.isNaN(exitSpread)) {
+                payload.exit_spread = Number(exitSpread.toFixed(4));
+            }
+
+            if (Number.isFinite(entrySpread) && Number.isFinite(exitSpread)) {
+                payload.expected_profit = Number((payload.entry_spread - payload.exit_spread).toFixed(4));
+            }
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (!submitButton) return;
+
+            if (!Number.isFinite(entrySpread) || !Number.isFinite(exitSpread)) {
+                showFeedback('error', 'Укажите корректные значения спредов для сделки');
+                return;
+            }
+
+            updateTrade(tradeId, payload, submitButton);
+        });
+
+        loadTrades();
+    </script>
+</body>
+</html>

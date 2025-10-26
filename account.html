@@ -25,7 +25,6 @@
             padding: 0 16px;
         }
 
-        /* Навигация */
         .nav-tabs {
             position: fixed;
             bottom: 0;
@@ -70,43 +69,93 @@
             font-size: 11px;
         }
 
-        /* Заголовок */
         .header {
             text-align: center;
-            padding: 24px 16px 16px;
+            padding: 16px 12px 12px;
         }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #999);
-        }
-
-        /* Сетка бирж */
-        .exchanges-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .exchanges-grid {
-                grid-template-columns: repeat(2, 1fr);
+        @media (min-width: 768px) {
+            .header {
+                padding: 24px 16px 16px;
             }
         }
 
-        /* Карточка биржи */
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+                margin-bottom: 8px;
+            }
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #999);
+        }
+
+        @media (min-width: 768px) {
+            .header p {
+                font-size: 14px;
+            }
+        }
+
+        .exchanges-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .exchanges-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                padding: 16px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .exchanges-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
         .exchange-card {
             background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 12px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 12px;
             position: relative;
+            transition: all 0.2s;
+        }
+        
+        .exchange-card[draggable="true"] {
+            cursor: move;
+        }
+        
+        .exchange-card[draggable="false"] {
+            cursor: default;
+        }
+        
+        .exchange-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        
+        .exchange-card.drag-over {
+            border: 2px dashed var(--tg-theme-button-color, #0088cc);
+            transform: scale(1.02);
+        }
+
+        @media (min-width: 768px) {
+            .exchange-card {
+                border-radius: 12px;
+                padding: 16px;
+            }
         }
 
         .exchange-card.connected {
@@ -122,12 +171,30 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .exchange-header {
+                margin-bottom: 12px;
+            }
         }
 
         .exchange-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
+            color: var(--tg-theme-text-color, #000);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .exchange-name {
+                font-size: 16px;
+                gap: 8px;
+            }
+        }
             color: var(--tg-theme-text-color, #000);
             display: flex;
             align-items: center;
@@ -180,18 +247,26 @@
         }
         
         .btn-refresh-inline {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             background: rgba(0, 136, 204, 0.1);
             transition: all 0.2s;
             flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .btn-refresh-inline {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
         }
 
         .btn-refresh-inline:active {
@@ -202,7 +277,6 @@
             background: rgba(0, 136, 204, 0.2);
         }
         
-        /* Спиннер загрузки */
         .loading-spinner {
             width: 16px;
             height: 16px;
@@ -223,19 +297,38 @@
         }
 
         .balance-value {
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 700;
             color: var(--tg-theme-button-color, #0088cc);
         }
 
+        @media (min-width: 768px) {
+            .balance-value {
+                font-size: 20px;
+            }
+        }
+
         .balance-value.large {
-            font-size: 18px;
+            font-size: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .balance-value.large {
+                font-size: 18px;
+            }
         }
 
         .wallet-info {
-            margin-top: 8px;
-            font-size: 11px;
+            margin-top: 6px;
+            font-size: 10px;
             color: var(--tg-theme-hint-color, #999);
+        }
+
+        @media (min-width: 768px) {
+            .wallet-info {
+                margin-top: 8px;
+                font-size: 11px;
+            }
         }
 
         .wallet-type {
@@ -247,7 +340,238 @@
             margin-right: 4px;
         }
 
-        /* Кнопка добавления */
+        .exchange-status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .exchange-status.online {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .exchange-status.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .exchange-status.manual {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .exchange-status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .exchange-status.online {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .exchange-status.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .exchange-status.manual {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.online {
+            background-color: #10b981;
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+        
+        .status-dot.offline {
+            background-color: #ef4444;
+        }
+        
+        .status-dot.manual {
+            background-color: #f59e0b;
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+            }
+        }
+        
+        @keyframes pulse-yellow {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            }
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 0 4px rgba(245, 158, 11, 0);
+            }
+        }
+
+        .btn-edit-balance {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            background: rgba(245, 158, 11, 0.1);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-left: 4px;
+        }
+
+        .btn-edit-balance:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-edit-balance:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--tg-theme-bg-color, #fff);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .modal-form-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .modal-info {
+            background: rgba(0, 136, 204, 0.1);
+            border-left: 3px solid var(--tg-theme-button-color, #0088cc);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .modal-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            color: #ef4444;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal-button-primary {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: white;
+        }
+
+        .modal-button-secondary {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--tg-theme-text-color, #000);
+        }
+
         .add-button {
             width: 100%;
             padding: 12px;
@@ -265,7 +589,6 @@
             transform: scale(0.98);
         }
 
-        /* Итоговый баланс */
         .total-balance {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px 16px;
@@ -285,8 +608,53 @@
             font-size: 28px;
             font-weight: 700;
         }
+        
+        .sort-container {
+            padding: 4px 16px 8px;
+            text-align: center;
+            background: var(--tg-theme-bg-color, #ffffff);
+        }
+        
+        .sort-select {
+            width: 100%;
+            max-width: 220px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 6px;
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #000);
+            cursor: pointer;
+            transition: all 0.2s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            padding-right: 30px;
+        }
+        
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #0088cc);
+            box-shadow: 0 0 0 2px rgba(0, 136, 204, 0.1);
+        }
+        
+        .sort-select option {
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+        }
+        
+        @media (min-width: 768px) {
+            .sort-select {
+                max-width: 240px;
+                font-size: 13px;
+            }
+        }
 
-        /* Пустое состояние */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -316,7 +684,6 @@
             cursor: pointer;
         }
 
-        /* Загрузка */
         .loading {
             text-align: center;
             padding: 40px;
@@ -338,7 +705,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Карточка добавления биржи */
         .add-exchange-card {
             background: var(--tg-theme-secondary-bg-color, #f5f5f5);
             border-radius: 12px;
@@ -373,8 +739,298 @@
             font-weight: 600;
             color: var(--tg-theme-text-color, #000);
         }
+                
+        .exchange-status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
 
-        /* Кнопки управления */
+        .exchange-status.online {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .exchange-status.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .exchange-status.manual {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .btn-edit-balance {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            background: rgba(245, 158, 11, 0.1);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-left: 4px;
+        }
+
+        .btn-edit-balance:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-edit-balance:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--tg-theme-bg-color, #fff);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-form-group {
+            margin-bottom: 16px;
+        }
+
+        .modal-form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .modal-form-group input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border-radius: 8px;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .modal-info {
+            background: rgba(0, 136, 204, 0.1);
+            border-left: 3px solid var(--tg-theme-button-color, #0088cc);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .modal-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            color: #ef4444;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal-button-primary {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: white;
+        }
+
+        .modal-button-secondary {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--tg-theme-text-color, #000);
+        }
+
+
+.btn-edit-balance {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 13px !important;
+}
+
+@media (min-width: 768px) {
+    .btn-edit-balance {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 14px !important;
+    }
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+}
+
+@media (min-width: 768px) {
+    .status-dot {
+        width: 8px;
+        height: 8px;
+    }
+}
+
+.balance-label {
+    font-size: 11px;
+}
+
+@media (min-width: 768px) {
+    .balance-label {
+        font-size: 12px;
+    }
+}
+
+.modal-content {
+    width: 95%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .modal-content {
+        width: 90%;
+        padding: 24px;
+    }
+}
+
+.btn-delete-top {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+}
+
+@media (min-width: 768px) {
+    .btn-delete-top {
+        width: 24px;
+        height: 24px;
+        font-size: 13px;
+    }
+}
+
+.total-balance {
+    padding: 16px 12px;
+}
+
+@media (min-width: 768px) {
+    .total-balance {
+        padding: 24px 16px;
+    }
+}
+
+.total-balance h2 {
+    font-size: 28px;
+}
+
+@media (min-width: 768px) {
+    .total-balance h2 {
+        font-size: 36px;
+    }
+}
+
+.nav-tabs {
+    padding: 10px 12px;
+    gap: 6px;
+}
+
+@media (min-width: 768px) {
+    .nav-tabs {
+        padding: 12px 16px;
+        gap: 8px;
+    }
+}
+
+.nav-tab {
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+@media (min-width: 768px) {
+    .nav-tab {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+
+.nav-icon {
+    font-size: 18px;
+}
+
+@media (min-width: 768px) {
+    .nav-icon {
+        font-size: 20px;
+    }
+}
+
+.nav-label {
+    font-size: 10px;
+}
+
+@media (min-width: 768px) {
+    .nav-label {
+        font-size: 11px;
+    }
+}
     </style>
 </head>
 <body>
@@ -389,6 +1045,15 @@
         <div class="total-balance">
             <div class="total-label">Общий баланс</div>
             <div class="total-value" id="totalBalance">0.00 USDT</div>
+        </div>
+        
+        <!-- Dropdown сортировки -->
+        <div class="sort-container">
+            <select class="sort-select" id="sortSelect" onchange="changeSortMode()">
+                <option value="manual">↕️ Свой порядок</option>
+                <option value="balance_desc">↓ По балансу (убывание)</option>
+                <option value="balance_asc">↑ По балансу (возрастание)</option>
+            </select>
         </div>
 
         <!-- Загрузка -->
@@ -420,6 +1085,10 @@
         <a href="index.html" class="nav-tab">
             <span class="nav-icon">📊</span>
             <span class="nav-label">Стратегия</span>
+        </a>
+        <a href="deals.html" class="nav-tab">
+            <span class="nav-icon">📑</span>
+            <span class="nav-label">Сделки</span>
         </a>
         <a href="account.html" class="nav-tab active">
             <span class="nav-icon">👤</span>
@@ -519,10 +1188,19 @@
 
         // Парсинг баланса из JSON строки
         function parseBalance(balanceStr) {
-            if (!balanceStr) return 0;
+            // Обрабатываем null, undefined, пустую строку
+            if (!balanceStr || balanceStr === 'null' || balanceStr === 'undefined') {
+                return 0;
+            }
             try {
-                const balance = JSON.parse(balanceStr);
-                return parseFloat(balance.total || balance.USDT || 0);
+                const data = JSON.parse(balanceStr);
+                // Если баланс = "__" (биржа не отвечает), возвращаем 0
+                if (data.total === "__" || data.total === null || data.total === undefined) {
+                    return 0;
+                }
+                const value = parseFloat(data.total);
+                // Проверяем что значение валидное число
+                return (isNaN(value) || !isFinite(value)) ? 0 : value;
             } catch {
                 return 0;
             }
@@ -571,6 +1249,12 @@
 
                 // Обновляем общий баланс
                 updateTotalBalance(userKeys);
+                
+                // Инициализируем drag and drop после рендера
+                initDragAndDrop();
+                
+                // Обновляем выбранное значение в селекте
+                updateSortSelect(getSortMode());
 
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
@@ -581,6 +1265,175 @@
                     </div>
                 `;
             }
+        }
+        
+        // Функции для работы с порядком бирж в localStorage
+        function getSavedOrder() {
+            const userId = getUserId();
+            const saved = localStorage.getItem(`exchange_order_${userId}`);
+            return saved ? JSON.parse(saved) : [];
+        }
+        
+        function saveOrder(exchanges) {
+            const userId = getUserId();
+            localStorage.setItem(`exchange_order_${userId}`, JSON.stringify(exchanges));
+        }
+        
+        // Режимы сортировки
+        const SORT_MODES = {
+            MANUAL: 'manual',
+            BALANCE_DESC: 'balance_desc',
+            BALANCE_ASC: 'balance_asc'
+        };
+        
+        // Получение текущего режима сортировки
+        function getSortMode() {
+            const userId = getUserId();
+            const saved = localStorage.getItem(`sort_mode_${userId}`);
+            return saved || SORT_MODES.MANUAL;
+        }
+        
+        // Сохранение режима сортировки
+        function saveSortMode(mode) {
+            const userId = getUserId();
+            localStorage.setItem(`sort_mode_${userId}`, mode);
+        }
+        
+        // Переключение режима сортировки
+        function changeSortMode() {
+            const select = document.getElementById('sortSelect');
+            const newMode = select.value;
+            
+            saveSortMode(newMode);
+            loadExchanges(); // Перезагружаем с новой сортировкой
+        }
+        
+        // Обновление выбранного значения в селекте
+        function updateSortSelect(mode) {
+            const select = document.getElementById('sortSelect');
+            if (select) {
+                select.value = mode;
+            }
+        }
+        
+        // Сортировка бирж по сохраненному порядку
+        function sortByOrder(exchanges) {
+            const savedOrder = getSavedOrder();
+            if (savedOrder.length === 0) return exchanges;
+            
+            const sorted = [];
+            const remaining = [...exchanges];
+            
+            // Добавляем в порядке из savedOrder
+            savedOrder.forEach(exchange => {
+                const index = remaining.indexOf(exchange);
+                if (index !== -1) {
+                    sorted.push(exchange);
+                    remaining.splice(index, 1);
+                }
+            });
+            
+            // Добавляем оставшиеся (новые биржи)
+            return [...sorted, ...remaining];
+        }
+        
+        // Сортировка бирж по балансу
+        function sortByBalance(exchanges, keysMap, ascending = false) {
+            const sorted = [...exchanges].sort((a, b) => {
+                const keyA = keysMap.get(a);
+                const keyB = keysMap.get(b);
+                
+                const balanceA = parseBalance(keyA.spot_balance) + parseBalance(keyA.futures_balance);
+                const balanceB = parseBalance(keyB.spot_balance) + parseBalance(keyB.futures_balance);
+                
+                return ascending ? balanceA - balanceB : balanceB - balanceA;
+            });
+            
+            return sorted;
+        }
+        
+        // Применение сортировки
+        function applySorting(exchanges, keysMap) {
+            const mode = getSortMode();
+            
+            if (mode === SORT_MODES.BALANCE_DESC) {
+                return sortByBalance(exchanges, keysMap, false);
+            } else if (mode === SORT_MODES.BALANCE_ASC) {
+                return sortByBalance(exchanges, keysMap, true);
+            } else {
+                return sortByOrder(exchanges);
+            }
+        }
+        
+        // Инициализация drag and drop
+        function initDragAndDrop() {
+            const cards = document.querySelectorAll('.exchange-card');
+            let draggedElement = null;
+            
+            // Проверяем режим сортировки
+            const sortMode = getSortMode();
+            const isDraggable = sortMode === SORT_MODES.MANUAL;
+            
+            cards.forEach(card => {
+                // Устанавливаем draggable в зависимости от режима
+                card.setAttribute('draggable', isDraggable);
+                
+                if (!isDraggable) return; // Если не ручной режим, не добавляем обработчики
+                
+                card.addEventListener('dragstart', (e) => {
+                    draggedElement = card;
+                    card.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                
+                card.addEventListener('dragend', (e) => {
+                    card.classList.remove('dragging');
+                    document.querySelectorAll('.exchange-card').forEach(c => {
+                        c.classList.remove('drag-over');
+                    });
+                });
+                
+                card.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    
+                    if (draggedElement !== card) {
+                        card.classList.add('drag-over');
+                    }
+                });
+                
+                card.addEventListener('dragleave', (e) => {
+                    card.classList.remove('drag-over');
+                });
+                
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    card.classList.remove('drag-over');
+                    
+                    if (draggedElement !== card) {
+                        const grid = document.getElementById('exchangesGrid');
+                        const allCards = [...grid.querySelectorAll('.exchange-card')];
+                        const draggedIndex = allCards.indexOf(draggedElement);
+                        const targetIndex = allCards.indexOf(card);
+                        
+                        if (draggedIndex < targetIndex) {
+                            card.parentNode.insertBefore(draggedElement, card.nextSibling);
+                        } else {
+                            card.parentNode.insertBefore(draggedElement, card);
+                        }
+                        
+                        // Сохраняем новый порядок
+                        const newOrder = [...grid.querySelectorAll('.exchange-card')].map(c => 
+                            c.getAttribute('data-exchange')
+                        );
+                        saveOrder(newOrder);
+                        
+                        // Переключаем режим на ручной
+                        saveSortMode(SORT_MODES.MANUAL);
+                        updateSortSelect(SORT_MODES.MANUAL);
+                    }
+                });
+            });
         }
 
         // Рендер карточек бирж (только добавленные)
@@ -598,67 +1451,16 @@
                 document.getElementById('emptyState').style.display = 'block';
                 return;
             }
+            
+            // Применяем сортировку (по балансу или по порядку пользователя)
+            const sortedExchanges = applySorting(connectedExchanges, keysMap);
 
-            const exchangeCards = connectedExchanges.map(exchange => {
+            const exchangeCards = sortedExchanges.map(exchange => {
                 const key = keysMap.get(exchange);
-                const spotBalance = parseBalance(key.spot_balance);
-                const futuresBalance = parseBalance(key.futures_balance);
-                const totalBalance = spotBalance + futuresBalance;
-
-                // Создаем список кошельков с балансом > 0
-                const wallets = [];
-                if (spotBalance > 0) {
-                    wallets.push({
-                        type: 'Spot',
-                        balance: spotBalance
-                    });
-                }
-                if (futuresBalance > 0) {
-                    wallets.push({
-                        type: 'Futures',
-                        balance: futuresBalance
-                    });
-                }
-
-                return `
-                    <div class="exchange-card connected">
-                        <div class="exchange-header">
-                            <div class="exchange-name">
-                                ${formatExchangeName(exchange)}
-                                <div class="loading-spinner" id="spinner-${key.id}"></div>
-                            </div>
-                            <button class="btn-delete-top" onclick="deleteExchange(${key.id}, '${exchange}')" title="Удалить">
-                                🗑️
-                            </button>
-                        </div>
-                        
-                        <div class="balance-section">
-                            <div class="balance-label">Общий баланс</div>
-                            <div class="balance-row">
-                                <button class="btn-refresh-inline" id="refresh-btn-${key.id}" onclick="refreshBalance('${exchange}', ${key.id})" title="Обновить баланс">
-                                    🔄
-                                </button>
-                                <div class="balance-value ${totalBalance > 10000 ? 'large' : ''}" id="balance-${key.id}">
-                                    ${totalBalance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
-                                </div>
-                            </div>
-                        </div>
-                        
-                        ${wallets.length > 0 ? `
-                            <div class="wallet-info" id="wallet-info-${key.id}">
-                                ${wallets.map(wallet => `
-                                    <div>
-                                        <span class="wallet-type">${wallet.type}</span>
-                                        ${wallet.balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+                return renderExchangeCard(exchange, key);
             });
 
-            // Добавляем карточку "Добавить биржу" в конец
+            // Добавляем карточку "Добавить биржу" в конец (не draggable)
             exchangeCards.push(`
                 <div class="add-exchange-card" onclick="addExchange()">
                     <div class="add-icon">➕</div>
@@ -739,26 +1541,19 @@
                 }) + ' USDT';
             }
 
-            // Обновляем детали кошельков - показываем только где баланс > 0
+            // Обновляем детали кошельков - всегда показываем оба типа
             const walletInfoEl = document.getElementById(`wallet-info-${keyId}`);
             if (walletInfoEl) {
-                let html = '';
-                if (spotTotal > 0) {
-                    html += `
-                        <div>
-                            <span class="wallet-type">Spot</span>
-                            ${spotTotal.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
-                        </div>
-                    `;
-                }
-                if (futuresTotal > 0) {
-                    html += `
-                        <div>
-                            <span class="wallet-type">Futures</span>
-                            ${futuresTotal.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
-                        </div>
-                    `;
-                }
+                const html = `
+                    <div>
+                        <span class="wallet-type">Spot</span>
+                        ${spotTotal.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
+                    </div>
+                    <div>
+                        <span class="wallet-type">Futures</span>
+                        ${futuresTotal.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT
+                    </div>
+                `;
                 walletInfoEl.innerHTML = html;
             }
 
@@ -768,71 +1563,58 @@
 
         // Автообновление всех балансов
         async function refreshAllBalances(userKeys) {
-            const userId = getUserId();
+            if (!userKeys || !Array.isArray(userKeys) || userKeys.length === 0) {
+                console.log('Нет бирж для обновления');
+                return;
+            }
             
-            try {
-                console.log('Обновление всех балансов...');
+            console.log('Обновление всех балансов параллельно...');
+            
+            // Функция обновления одной биржи
+            async function refreshSingleExchange(key) {
+                const spinner = document.getElementById(`spinner-${key.id}`);
                 
-                // Показываем спиннеры для всех бирж
-                if (userKeys && Array.isArray(userKeys)) {
-                    userKeys.forEach(key => {
-                        const spinner = document.getElementById(`spinner-${key.id}`);
-                        if (spinner) {
-                            spinner.classList.add('active');
-                        }
+                try {
+                    // Показываем спиннер для этой биржи
+                    if (spinner) {
+                        spinner.classList.add('active');
+                    }
+                    
+                    console.log(`Запрос баланса для ${key.exchange}...`);
+                    
+                    const response = await fetch(`${API_URL}/api/keys/${key.id}/refresh-balance`, {
+                        method: 'POST'
                     });
-                }
 
-                const response = await fetch(`${API_URL}/api/keys/${userId}/refresh-all`, {
-                    method: 'POST'
-                });
+                    if (!response.ok) {
+                        throw new Error(`Ошибка обновления ${key.exchange}`);
+                    }
 
-                if (!response.ok) {
-                    throw new Error('Ошибка обновления балансов');
-                }
-
-                const data = await response.json();
-                console.log(`Обновлено: ${data.updated}, Ошибок: ${data.errors}`);
-
-                // Обновляем балансы в UI напрямую
-                if (data.results && Array.isArray(data.results)) {
-                    data.results.forEach(result => {
-                        if (result.success) {
-                            // Находим key по exchange
-                            const key = userKeys.find(k => k.exchange === result.exchange);
-                            if (key) {
-                                updateBalanceUI(key.id, {
-                                    spot_balance: { total: result.spot },
-                                    futures_balance: { total: result.futures }
-                                });
-                            }
-                        }
+                    const data = await response.json();
+                    console.log(`✅ ${key.exchange}: обновлено`);
+                    
+                    // Обновляем UI для этой биржи
+                    updateBalanceUI(key.id, {
+                        spot_balance: data.spot_balance,
+                        futures_balance: data.futures_balance
                     });
-                }
-                
-                // Скрываем спиннеры
-                if (userKeys && Array.isArray(userKeys)) {
-                    userKeys.forEach(key => {
-                        const spinner = document.getElementById(`spinner-${key.id}`);
-                        if (spinner) {
-                            spinner.classList.remove('active');
-                        }
-                    });
-                }
-
-            } catch (error) {
-                console.error('Ошибка автообновления:', error);
-                
-                // Скрываем спиннеры в случае ошибки
-                if (userKeys && Array.isArray(userKeys)) {
-                    userKeys.forEach(key => {
-                        const spinner = document.getElementById(`spinner-${key.id}`);
-                        if (spinner) {
-                            spinner.classList.remove('active');
-                        }
-                    });
+                    
+                } catch (error) {
+                    console.error(`❌ Ошибка обновления ${key.exchange}:`, error);
+                } finally {
+                    // Скрываем спиннер для этой биржи
+                    if (spinner) {
+                        spinner.classList.remove('active');
+                    }
                 }
             }
+            
+            // Запускаем все обновления параллельно
+            await Promise.allSettled(
+                userKeys.map(key => refreshSingleExchange(key))
+            );
+            
+            console.log('Все балансы обновлены');
         }
 
         // Удаление биржи
@@ -879,6 +1661,227 @@
                 addExchange();
             });
         }
+    </script>
+
+    <!-- Модальное окно для ручного ввода баланса -->
+    <div class="modal-overlay" id="manualBalanceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Ручное редактирование баланса</div>
+                <button class="modal-close" onclick="closeManualBalanceModal()">✕</button>
+            </div>
+
+            <div class="modal-info">
+                <strong>Биржа:</strong> <span id="modal-exchange-name"></span><br>
+                <strong>Статус:</strong> <span id="modal-exchange-status"></span>
+            </div>
+
+            <div id="modal-online-warning" class="modal-warning" style="display: none;">
+                ⚠️ Биржа онлайн. Ручное редактирование недоступно.
+            </div>
+
+            <form id="manualBalanceForm">
+                <div class="modal-form-group">
+                    <label>Spot баланс (USDT)</label>
+                    <input type="number" id="manual-spot" step="0.01" min="0" required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label>Futures баланс (USDT)</label>
+                    <input type="number" id="manual-futures" step="0.01" min="0" required>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="modal-button modal-button-secondary" onclick="closeManualBalanceModal()">
+                        Отмена
+                    </button>
+                    <button type="submit" class="modal-button modal-button-primary" id="modal-submit-btn">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Функция рендеринга карточки биржи с статусом
+        function renderExchangeCard(exchange, key) {
+            const spotBalance = parseBalance(key.spot_balance);
+            const futuresBalance = parseBalance(key.futures_balance);
+            const totalBalance = spotBalance + futuresBalance;
+
+            // Определяем статус биржи
+            const isOnline = key.is_online !== false;
+            const isManual = key.is_manual_balance === true;
+
+            // Статус биржи
+            let statusClass, statusText, dotClass;
+            if (isManual) {
+                statusClass = 'manual';
+                statusText = '';  // Убираем текст
+                dotClass = 'manual';  // Желтая точка
+            } else if (isOnline) {
+                statusClass = 'online';
+                statusText = 'Онлайн';
+                dotClass = 'online';
+            } else {
+                statusClass = 'offline';
+                statusText = 'Не отвечает';
+                dotClass = 'offline';
+            }
+
+            // Форматируем баланс - всегда показываем баланс из БД
+            const balanceDisplay = totalBalance.toLocaleString('ru-RU', { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            }) + ' USDT';
+
+            // Создаем список кошельков - всегда показываем оба типа
+            const wallets = [
+                { type: 'Spot', balance: spotBalance },
+                { type: 'Futures', balance: futuresBalance }
+            ];
+
+            return `
+                <div class="exchange-card connected" data-key-id="${key.id}" data-exchange="${exchange}">
+                    <div class="exchange-header">
+                        <div class="exchange-name">
+                            ${dotClass === 'online' || dotClass === 'manual' ? `<span class="status-dot ${dotClass}"></span>` : ''}
+                            ${formatExchangeName(exchange)}
+                            <div class="loading-spinner" id="spinner-${key.id}"></div>
+                        </div>
+                        <button class="btn-delete-top" onclick="deleteExchange(${key.id}, '${exchange}')" title="Удалить">
+                            🗑️
+                        </button>
+                    </div>
+
+                    ${!isOnline && !isManual ? `
+                    <div class="exchange-status ${statusClass}">
+                        ${dotClass && dotClass !== 'online' && dotClass !== 'manual' ? `<span class="status-dot ${dotClass}"></span>` : ''}
+                        ${statusText}
+                    </div>
+                    ` : ''}
+
+                    <div class="balance-section">
+                        <div class="balance-label">Общий баланс</div>
+                        <div class="balance-row">
+                            <button class="btn-refresh-inline" id="refresh-btn-${key.id}" 
+                                    onclick="refreshBalance('${exchange}', ${key.id})" 
+                                    title="Обновить баланс">
+                                🔄
+                            </button>
+                            ${!isOnline ? `
+                            <button class="btn-edit-balance" id="edit-btn-${key.id}"
+                                    onclick="openManualBalanceModal(${key.id}, '${exchange}', ${isOnline})"
+                                    title="Редактировать вручную">
+                                ✏️
+                            </button>
+                            ` : ''}
+                            <div class="balance-value ${totalBalance > 10000 ? 'large' : ''}" id="balance-${key.id}">
+                                ${balanceDisplay}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wallet-info" id="wallet-info-${key.id}">
+                        ${wallets.map(wallet => `
+                            <div>
+                                <span class="wallet-type">${wallet.type}</span>
+                                ${wallet.balance.toLocaleString('ru-RU', { 
+                                    minimumFractionDigits: 2, 
+                                    maximumFractionDigits: 2 
+                                })} USDT
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Переменная для отслеживания текущей редактируемой биржи
+        let currentEditingKeyId = null;
+
+        // Открыть модальное окно для ручного ввода
+        function openManualBalanceModal(keyId, exchangeName, isOnline) {
+            if (isOnline) {
+                alert('⚠️ Биржа онлайн. Используйте автоматическое обновление.');
+                return;
+            }
+
+            currentEditingKeyId = keyId;
+
+            const modal = document.getElementById('manualBalanceModal');
+            const exchangeNameEl = document.getElementById('modal-exchange-name');
+            const statusEl = document.getElementById('modal-exchange-status');
+            const warningEl = document.getElementById('modal-online-warning');
+            const form = document.getElementById('manualBalanceForm');
+            const submitBtn = document.getElementById('modal-submit-btn');
+
+            exchangeNameEl.textContent = formatExchangeName(exchangeName);
+            statusEl.textContent = '🔴 Не отвечает';
+
+            if (isOnline) {
+                warningEl.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                warningEl.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+
+            // Сбрасываем форму
+            form.reset();
+
+            modal.classList.add('active');
+        }
+
+        // Закрыть модальное окно
+        function closeManualBalanceModal() {
+            const modal = document.getElementById('manualBalanceModal');
+            modal.classList.remove('active');
+            currentEditingKeyId = null;
+        }
+
+        // Обработчик формы ручного ввода
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('manualBalanceForm');
+
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    if (!currentEditingKeyId) return;
+
+                    const spotUsdt = parseFloat(document.getElementById('manual-spot').value);
+                    const futuresUsdt = parseFloat(document.getElementById('manual-futures').value);
+
+                    try {
+                        const response = await fetch(`${API_URL}/api/keys/${currentEditingKeyId}/manual-balance`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                spot_usdt: spotUsdt,
+                                futures_usdt: futuresUsdt
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.detail || 'Ошибка сохранения');
+                        }
+
+                        // Закрываем модалку и перезагружаем данные
+                        closeManualBalanceModal();
+                        await loadExchanges();
+
+                        alert('✅ Баланс успешно обновлен вручную');
+
+                    } catch (error) {
+                        console.error('Ошибка:', error);
+                        alert('❌ ' + error.message);
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
