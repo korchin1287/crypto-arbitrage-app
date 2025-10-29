@@ -1915,9 +1915,9 @@ button, .button {
                 updateChartExchangeStatus('short', short, newShortStatus);
                 updateChartExchangeStatus('long', long, newLongStatus);
                 
-                liveEntrySpread.textContent = data.entry_spread.toFixed(2) + '%';
-                liveExitSpread.textContent = data.exit_spread.toFixed(2) + '%';
-                liveFunding.textContent = data.funding_rate.toFixed(4) + '%';
+                liveEntrySpread.textContent = (data.entry_spread != null ? data.entry_spread.toFixed(2) : '--') + '%';
+                liveExitSpread.textContent = (data.exit_spread != null ? data.exit_spread.toFixed(2) : '--') + '%';
+                liveFunding.textContent = (data.funding_rate != null ? data.funding_rate.toFixed(4) : '--') + '%';
                 
                 updateChart(data.entry_spread, data.exit_spread);
                 
