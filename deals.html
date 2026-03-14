@@ -561,6 +561,7 @@
                 font-size: 11px;
             }
         }
+
     </style>
 </head>
 <body>
@@ -1141,18 +1142,35 @@
                 const exitValue = Number(data.exit_spread);
                 const entry = formatPercent(entryValue);
                 const exit = formatPercent(exitValue);
-                const fundingRate = formatPercent(data.funding_rate, 4);
+
+                // Funding diff - ИСПРАВЛЕНО
+                const fundingDiff = data.funding_diff !== undefined && data.funding_diff !== null
+                    ? (data.funding_diff * 100)
+                    : null;
+
                 const shortFunding = data.short && data.short.funding !== undefined && data.short.funding !== null
-                    ? formatPercent(data.short.funding, 4)
-                    : '—';
+                    ? (data.short.funding * 100)
+                    : null;
+
                 const longFunding = data.long && data.long.funding !== undefined && data.long.funding !== null
-                    ? formatPercent(data.long.funding, 4)
+                    ? (data.long.funding * 100)
+                    : null;
+
+                // Адаптивное форматирование
+                const fundingDiffStr = fundingDiff !== null 
+                    ? ((Math.abs(fundingDiff) < 0.001 ? fundingDiff.toFixed(6) : fundingDiff.toFixed(4)) + '%')
+                    : '—';
+                const shortFundingStr = shortFunding !== null 
+                    ? ((Math.abs(shortFunding) < 0.001 ? shortFunding.toFixed(6) : shortFunding.toFixed(4)) + '%')
+                    : '—';
+                const longFundingStr = longFunding !== null 
+                    ? ((Math.abs(longFunding) < 0.001 ? longFunding.toFixed(6) : longFunding.toFixed(4)) + '%')
                     : '—';
 
                 if (indicatorEl) indicatorEl.classList.add('online');
                 if (entryEl) entryEl.textContent = `Вход: ${entry}`;
                 if (exitEl) exitEl.textContent = `Выход: ${exit}`;
-                if (fundingEl) fundingEl.textContent = `Фандинг: ${fundingRate} (Ш: ${shortFunding} | Л: ${longFunding})`;
+                if (fundingEl) fundingEl.textContent = `Фандинг: ${fundingDiffStr} (Ш: ${shortFundingStr} | Л: ${longFundingStr})`;
                 updateTradeChartSeries(card, entryValue, exitValue);
 
             } catch (error) {
@@ -1187,7 +1205,7 @@
             };
 
             await tick();
-            liveUpdateHandle = setInterval(tick, 3000);
+            liveUpdateHandle = setInterval(tick, 500);
         }
 
         function buildStatusBadge(status) {

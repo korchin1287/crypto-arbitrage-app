@@ -1363,7 +1363,7 @@ button, .button {
                 coin.length >= 1 &&
                 short &&
                 long &&
-                short !== long
+                (short !== long || shortType.value !== longType.value)
             );
 
             if (readyToTrade) {
@@ -1915,10 +1915,12 @@ button, .button {
                 updateChartExchangeStatus('short', short, newShortStatus);
                 updateChartExchangeStatus('long', long, newLongStatus);
                 
-                liveEntrySpread.textContent = (data.entry_spread != null ? data.entry_spread.toFixed(2) : '--') + '%';
-                liveExitSpread.textContent = (data.exit_spread != null ? data.exit_spread.toFixed(2) : '--') + '%';
-                liveFunding.textContent = (data.funding_rate != null ? data.funding_rate.toFixed(4) : '--') + '%';
-                
+                liveEntrySpread.textContent = (data.entry_spread != null ? data.entry_spread.toFixed(3) : '--') + '%';
+                liveExitSpread.textContent = (data.exit_spread != null ? data.exit_spread.toFixed(3) : '--') + '%';
+                const fundingPercent = data.funding_diff != null ? data.funding_diff * 100 : null;
+                liveFunding.textContent = fundingPercent !== null 
+                    ? (Math.abs(fundingPercent) < 0.001 ? fundingPercent.toFixed(6) : fundingPercent.toFixed(4)) + '%'
+                    : '--%';                
                 updateChart(data.entry_spread, data.exit_spread);
                 
             } catch (error) {
