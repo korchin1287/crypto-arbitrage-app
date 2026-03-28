@@ -6,20 +6,8 @@
     <title>Сделки - Крипто Арбитраж</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="common.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #0f172a);
-            padding-bottom: 84px;
-        }
-
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -47,18 +35,16 @@
             line-height: 1.5;
         }
 
+        /* deals-specific: компактнее для списка */
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
             gap: 6px;
-            border-radius: 10px;
             padding: 10px 14px;
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
+        }
+
+        /* deals-specific: primary без full-width */
+        .btn-primary {
+            width: auto;
         }
 
         .btn-secondary {
@@ -66,33 +52,15 @@
             color: var(--tg-theme-button-color, #0088cc);
         }
 
-        .btn-secondary:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: var(--tg-theme-button-color, #0088cc);
-            color: #ffffff;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-
         .btn-muted {
             background: var(--tg-theme-secondary-bg-color, #f1f5f9);
             color: var(--tg-theme-hint-color, #64748b);
         }
 
+        /* deals-specific: outline-danger вместо solid */
         .btn-danger {
             background: rgba(220, 38, 38, 0.12);
-            color: #dc2626;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+            color: var(--color-danger);
         }
 
         .page-feedback {
@@ -106,12 +74,12 @@
 
         .page-feedback.success {
             background: rgba(34, 197, 94, 0.12);
-            color: #15803d;
+            color: #15803d; /* dark success — нет CSS variable */
         }
 
         .page-feedback.error {
             background: rgba(248, 113, 113, 0.15);
-            color: #b91c1c;
+            color: #b91c1c; /* dark danger — нет CSS variable */
         }
 
         .placeholder {
@@ -487,80 +455,6 @@
             margin-top: 14px;
         }
 
-        .nav-tabs {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-            background: var(--tg-theme-bg-color, #ffffff);
-            border-top: 1px solid var(--tg-theme-hint-color, #ddd);
-            z-index: 100;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .nav-tabs {
-            padding: 10px 12px;
-            gap: 6px;
-        }
-
-        @media (min-width: 768px) {
-            .nav-tabs {
-                padding: 12px 16px;
-                gap: 8px;
-            }
-        }
-
-        .nav-tab {
-            flex: 1;
-            padding: 8px 10px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 8px;
-            background: transparent;
-            color: var(--tg-theme-hint-color, #999);
-            text-decoration: none;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        @media (min-width: 768px) {
-            .nav-tab {
-                padding: 10px 16px;
-                font-size: 14px;
-            }
-        }
-
-        .nav-tab.active {
-            background: var(--tg-theme-button-color, #0088cc);
-            color: #ffffff;
-        }
-
-        .nav-icon {
-            font-size: 18px;
-        }
-
-        @media (min-width: 768px) {
-            .nav-icon {
-                font-size: 20px;
-            }
-        }
-
-        .nav-label {
-            font-size: 10px;
-        }
-
-        @media (min-width: 768px) {
-            .nav-label {
-                font-size: 11px;
-            }
-        }
 
     </style>
 </head>
@@ -580,7 +474,7 @@
 
         <div id="emptyState" class="placeholder" style="display: none;">
             <span class="emoji">🗂️</span>
-            <p>Сделок пока нет. Создайте первую на странице «Стратегия», нажав кнопку «Торговать».</p>
+            <p>Сделок пока нет. Откройте скринер и выберите пару для торговли.</p>
         </div>
 
         <div id="tradesList" class="trades-list"></div>
@@ -589,7 +483,7 @@
     <div class="nav-tabs">
         <a href="index.html" class="nav-tab">
             <span class="nav-icon">📊</span>
-            <span class="nav-label">Стратегия</span>
+            <span class="nav-label">Скринер</span>
         </a>
         <a href="deals.html" class="nav-tab active">
             <span class="nav-icon">📑</span>
@@ -1255,7 +1149,7 @@
                 : '';
 
             return `
-                <div class="trade-card"
+                <div class="card trade-card"
                     data-trade-id="${trade.id}"
                     data-coin="${escapeHtml((trade.coin || '').toUpperCase())}"
                     data-short-exchange="${escapeHtml(trade.short_exchange || '')}"

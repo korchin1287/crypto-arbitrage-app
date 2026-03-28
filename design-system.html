@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="common.css">
+  <style>
+    /* Layout-only styles for the catalog */
+    .ds-section {
+      margin-bottom: 32px;
+    }
+    .ds-section h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .ds-color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .ds-color-swatch {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+    }
+    .ds-color-preview {
+      height: 60px;
+    }
+    .ds-color-info {
+      padding: 8px;
+      font-size: 11px;
+      background: var(--bg-primary);
+    }
+    .ds-color-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+    .ds-color-value {
+      color: var(--text-hint);
+    }
+    .ds-typo-row {
+      margin-bottom: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-divider);
+    }
+    .ds-typo-meta {
+      font-size: 11px;
+      color: var(--text-hint);
+      margin-top: 2px;
+    }
+    .ds-button-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .ds-button-grid .btn {
+      width: auto;
+      min-width: 120px;
+    }
+    .ds-button-grid .btn-primary {
+      width: auto;
+    }
+    .ds-chip-bar {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-secondary);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .ds-badge-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .ds-form-group {
+      margin-bottom: 14px;
+    }
+    .ds-form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+    .ds-states-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="page-header">
+    <h1 class="page-title">Design System</h1>
+  </div>
+
+  <!-- 1. Colors -->
+  <div class="ds-section">
+    <h2>Цвета</h2>
+    <div class="ds-color-grid" id="colorGrid"></div>
+  </div>
+
+  <!-- 2. Typography -->
+  <div class="ds-section">
+    <h2>Типографика</h2>
+
+    <div class="ds-typo-row">
+      <div style="font-size:17px;font-weight:700">Page Title - Заголовок страницы</div>
+      <div class="ds-typo-meta">17px / 700</div>
+    </div>
+    <div class="ds-typo-row">
+      <div style="font-size:14px;font-weight:400">Body - Основной текст интерфейса</div>
+      <div class="ds-typo-meta">14px / 400</div>
+    </div>
+    <div class="ds-typo-row">
+      <div style="font-size:12px;font-weight:400">Small - Мелкий текст, метаданные</div>
+      <div class="ds-typo-meta">12px / 400</div>
+    </div>
+    <div class="ds-typo-row">
+      <div style="font-size:11px;font-weight:400">Caption - Подписи, хелперы</div>
+      <div class="ds-typo-meta">11px / 400</div>
+    </div>
+    <div class="ds-typo-row">
+      <div style="font-size:14px;font-weight:400;color:var(--text-hint)">Hint - Приглушённый текст, плейсхолдеры</div>
+      <div class="ds-typo-meta">14px / 400 / text-hint</div>
+    </div>
+  </div>
+
+  <!-- 3. Buttons -->
+  <div class="ds-section">
+    <h2>Кнопки</h2>
+    <div class="ds-button-grid">
+      <button class="btn btn-primary">Основная</button>
+      <button class="btn btn-danger">Удалить</button>
+      <button class="btn btn-outline">Отмена</button>
+      <button class="btn">Кнопка</button>
+      <button class="btn btn-primary" disabled>Disabled</button>
+    </div>
+  </div>
+
+  <!-- 4. Cards -->
+  <div class="ds-section">
+    <h2>Карточки</h2>
+    <div class="card">
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px">Заголовок карточки</div>
+      <div style="font-size:13px;color:var(--text-secondary)">Описание внутри карточки. Базовый компонент .card с padding 12px 14px, border-radius 12px.</div>
+    </div>
+  </div>
+
+  <!-- 5. Chips -->
+  <div class="ds-section">
+    <h2>Чипы</h2>
+    <div class="ds-chip-bar">
+      <button class="chip active">Активный</button>
+      <button class="chip">Обычный</button>
+      <button class="chip">Ещё один</button>
+    </div>
+  </div>
+
+  <!-- 6. Badges -->
+  <div class="ds-section">
+    <h2>Бейджи</h2>
+    <div class="ds-badge-row">
+      <span class="badge badge-green">+2.45%</span>
+      <span class="badge badge-red">-1.12%</span>
+      <span class="badge badge-yellow">Pending</span>
+    </div>
+  </div>
+
+  <!-- 7. Forms -->
+  <div class="ds-section">
+    <h2>Формы</h2>
+    <div class="ds-form-group">
+      <label>Input</label>
+      <input class="input" type="text" placeholder="Введите значение...">
+    </div>
+    <div class="ds-form-group">
+      <label>Select</label>
+      <select class="select">
+        <option>Binance</option>
+        <option>Bybit</option>
+        <option>OKX</option>
+      </select>
+    </div>
+    <div class="ds-form-group">
+      <label>Textarea</label>
+      <textarea class="textarea" placeholder="Комментарий..."></textarea>
+    </div>
+  </div>
+
+  <!-- 8. States -->
+  <div class="ds-section">
+    <h2>Состояния</h2>
+    <div class="ds-states-grid">
+      <div class="state-loading">Загрузка данных...</div>
+      <div class="state-empty">Нет данных. Добавьте первую запись.</div>
+      <div class="state-error">Ошибка загрузки. Попробуйте позже.</div>
+      <div class="state-success">Операция выполнена успешно.</div>
+    </div>
+  </div>
+
+  <!-- 9. Navigation -->
+  <div class="ds-section">
+    <h2>Навигация</h2>
+    <div style="font-size:13px;color:var(--text-hint);margin-bottom:8px">Нижняя панель навигации зафиксирована внизу экрана</div>
+  </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<div class="nav-tabs">
+    <a href="index.html" class="nav-tab">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Скринер</span>
+    </a>
+    <a href="deals.html" class="nav-tab">
+        <span class="nav-icon">📑</span>
+        <span class="nav-label">Сделки</span>
+    </a>
+    <a href="account.html" class="nav-tab">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Аккаунт</span>
+    </a>
+</div>
+
+<script>
+  (function() {
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    var colors = [
+      { name: '--color-accent',    label: 'Accent',       fallback: '#0088cc' },
+      { name: '--color-success',   label: 'Success',      fallback: '#16a34a' },
+      { name: '--color-danger',    label: 'Danger',       fallback: '#dc2626' },
+      { name: '--color-warning',   label: 'Warning',      fallback: '#d97706' },
+      { name: '--bg-primary',      label: 'BG Primary',   fallback: '#ffffff' },
+      { name: '--bg-secondary',    label: 'BG Secondary', fallback: '#f5f5f5' },
+      { name: '--text-primary',    label: 'Text Primary', fallback: '#000000' },
+      { name: '--text-secondary',  label: 'Text Secondary', fallback: '#64748b' },
+      { name: '--text-hint',       label: 'Text Hint',    fallback: '#999999' },
+      { name: '--border-light',    label: 'Border',       fallback: 'rgba(0,0,0,0.08)' }
+    ];
+
+    var grid = document.getElementById('colorGrid');
+    colors.forEach(function(c) {
+      var computed = getComputedStyle(document.documentElement).getPropertyValue(c.name).trim();
+      var swatch = document.createElement('div');
+      swatch.className = 'ds-color-swatch';
+
+      var preview = document.createElement('div');
+      preview.className = 'ds-color-preview';
+      preview.style.background = 'var(' + c.name + ')';
+
+      var info = document.createElement('div');
+      info.className = 'ds-color-info';
+
+      var nameEl = document.createElement('span');
+      nameEl.className = 'ds-color-name';
+      nameEl.textContent = c.label;
+
+      var valueEl = document.createElement('span');
+      valueEl.className = 'ds-color-value';
+      valueEl.textContent = computed || c.fallback;
+
+      info.appendChild(nameEl);
+      info.appendChild(valueEl);
+      swatch.appendChild(preview);
+      swatch.appendChild(info);
+      grid.appendChild(swatch);
+    });
+  })();
+</script>
+
+</body>
+</html>

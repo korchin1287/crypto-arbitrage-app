@@ -5,855 +5,435 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Крипто Арбитраж</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="common.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Main viewport */
+        .viewport {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px 16px 0;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            padding-bottom: 80px;
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-success);
+            background: rgba(22, 163, 74, 0.1);
+            border-radius: 20px;
+            padding: 4px 10px;
         }
 
-        .nav-tabs {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--color-success);
+            animation: livepulse 2s infinite;
+        }
+
+        @keyframes livepulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+
+
+
+        /* Strategy tabs */
+        .strategy-tabs {
             display: flex;
             gap: 8px;
-            padding: 12px 16px;
-            background: var(--tg-theme-bg-color, #ffffff);
-            border-top: 1px solid var(--tg-theme-hint-color, #ddd);
-            z-index: 100;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            padding: 0 16px 12px;
+        }
+        .strat-tab {
+            flex: 1;
+            min-height: 44px;
+            border: none;
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-hint-color, #888);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            cursor: pointer;
+        }
+        .strat-tab.strat-active {
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #fff);
         }
 
-        .nav-tab {
-            flex: 1;
-            padding: 10px 16px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 8px;
-            background: transparent;
-            color: var(--tg-theme-hint-color, #999);
-            text-decoration: none;
-            transition: all 0.2s;
+        /* Cards list */
+        .cards-list {
             display: flex;
             flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Row 1: coin name + spread pill */
+        .card-top {
+            display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: space-between;
+            margin-bottom: 7px;
         }
 
-        .nav-tab.active {
-            background: var(--tg-theme-button-color, #0088cc);
-            color: white;
-        }
-        
-        .nav-icon {
-            font-size: 20px;
-        }
-        
-        .nav-label {
-            font-size: 11px;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 0 16px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #999);
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .header p {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #999);
-        }
-
-        .section {
-            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--tg-theme-hint-color, #999);
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            letter-spacing: 0.5px;
-        }
-
-        .select-group {
-            margin-bottom: 16px;
-        }
-
-        .select-group:last-child {
-            margin-bottom: 0;
-        }
-
-        label {
-            display: block;
-            font-size: 15px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: var(--tg-theme-text-color, #000);
-        }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid var(--tg-theme-hint-color, #ddd);
-            border-radius: 8px;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: var(--tg-theme-button-color, #0088cc);
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-group:last-child {
-            margin-bottom: 0;
-        }
-
-        input[type="number"],
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid var(--tg-theme-hint-color, #ddd);
-            border-radius: 8px;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
-        }
-
-        input[type="number"]:focus,
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--tg-theme-button-color, #0088cc);
-        }
-
-        .input-suffix {
-            position: relative;
-        }
-
-        .input-suffix input {
-            padding-right: 40px;
-        }
-
-        .input-suffix::after {
-            content: '%';
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--tg-theme-hint-color, #999);
-            font-size: 16px;
-            pointer-events: none;
-        }
-
-        .profit-display {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            color: white;
-            margin-bottom: 16px;
-        }
-
-        .profit-label {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .profit-value {
-            font-size: 32px;
+        .card-coin-name {
+            font-size: 17px;
             font-weight: 700;
-            margin-bottom: 4px;
+            color: var(--tg-theme-text-color, #000000);
+            line-height: 1;
         }
 
-        .profit-value.positive {
-            color: #4ade80;
+        .spread-pill {
+            font-size: 15px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            line-height: 1;
         }
 
-        .profit-value.negative {
-            color: #f87171;
-        }
+        .pill-green  { color: var(--color-success); background: rgba(22, 163, 74, 0.12); }
+        .pill-yellow { color: var(--color-warning); background: rgba(217, 119, 6, 0.12); }
+        .pill-red    { color: var(--color-danger); background: rgba(220, 38, 38, 0.12); }
 
-        .profit-description {
+        /* Row 2: direction Long → Short */
+        .card-exchanges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
             font-size: 13px;
-            opacity: 0.8;
+            color: var(--tg-theme-hint-color, #64748b);
         }
 
-        .info-box {
-            background: rgba(0, 136, 204, 0.1);
-            border-left: 3px solid var(--tg-theme-button-color, #0088cc);
-            border-radius: 6px;
-            padding: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-top: 16px;
+        .tag-l {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-success);
+            background: rgba(22, 163, 74, 0.1);
+            padding: 2px 6px;
+            border-radius: 5px;
+            letter-spacing: 0.2px;
         }
 
-        .strategy-preview {
-            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 8px;
-            padding: 12px;
+        .tag-s {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-danger);
+            background: rgba(220, 38, 38, 0.08);
+            padding: 2px 6px;
+            border-radius: 5px;
+            letter-spacing: 0.2px;
+        }
+
+        .exch-name {
             font-size: 13px;
-            line-height: 1.6;
-            margin-top: 12px;
+            font-weight: 500;
+            color: var(--tg-theme-text-color, #000000);
         }
 
-        .strategy-preview strong {
-            color: var(--tg-theme-button-color, #0088cc);
+        .exch-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1px;
         }
 
-        .toggle-button {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
+        .exch-price {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+        }
+
+        .exch-arrow {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin: 0 1px;
+        }
+
+        /* Row 3: stat blocks */
+        .card-stats {
+            display: flex;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            padding-top: 10px;
+        }
+
+        .stat-block {
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-block + .stat-block {
+            border-left: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-lbl {
+            display: block;
+            font-size: 10px;
             font-weight: 600;
-            border: 2px solid var(--tg-theme-button-color, #0088cc);
-            border-radius: 10px;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+            color: var(--tg-theme-hint-color, #64748b);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 3px;
+        }
+
+        .stat-val {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .val-green { color: var(--color-success); }
+        .val-red   { color: var(--color-danger); }
+        .val-dim   { color: var(--tg-theme-hint-color, #64748b); }
+
+        /* Details toggle button */
+        .details-btn {
+            width: calc(100% + 28px);
+            margin: 10px -14px -12px;
+            padding: 10px 16px;
+            min-height: 44px;
+            background: transparent;
+            border: none;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            color: var(--tg-theme-hint-color, #64748b);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
+            gap: 5px;
+            border-radius: 0 0 11px 11px;
+            transition: background 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .toggle-button:active {
-            transform: scale(0.98);
+        .details-btn:active { background: rgba(0, 0, 0, 0.04); }
+
+        .details-chevron {
+            display: inline-block;
+            font-size: 12px;
+            transition: transform 0.2s ease;
+            line-height: 1;
         }
 
-        .toggle-button.online {
-            background-color: var(--tg-theme-button-color, #0088cc);
-            color: white;
+        .stat-card.expanded .details-chevron {
+            transform: rotate(180deg);
         }
 
-        .trade-actions {
-            margin-top: 16px;
-            display: none;
+        /* Expanded detail block */
+        .card-detail {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.25s ease;
         }
 
-        .trade-button {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 10px;
-            border: none;
-            background-color: var(--tg-theme-button-color, #0088cc);
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 12px rgba(0, 136, 204, 0.25);
+        .stat-card.expanded .card-detail {
+            max-height: 500px;
         }
 
-        .trade-button:active {
-            transform: scale(0.98);
-        }
-
-        .trade-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .trade-feedback {
+        .detail-inner {
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
             margin-top: 10px;
-            font-size: 13px;
-            line-height: 1.5;
-            display: none;
+            padding-top: 12px;
         }
 
-        .trade-feedback.success {
-            color: #059669;
-        }
-
-        .trade-feedback.error {
-            color: #dc2626;
-        }
-
-        .trade-feedback a {
-            color: inherit;
-            text-decoration: underline;
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #6b7280;
-            transition: all 0.3s ease;
-        }
-
-        .status-indicator.online {
-            background-color: #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        .online-data {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--tg-theme-hint-color, #ddd);
-        }
-
-        .spreads-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .spread-item {
-            background: rgba(0, 136, 204, 0.05);
-            padding: 8px 12px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .spread-label {
+        /* SVG chart */
+        .chart-caption {
             font-size: 11px;
             font-weight: 500;
-            color: var(--tg-theme-hint-color, #999);
-            margin-bottom: 4px;
-        }
-        
-        .spread-value {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--tg-theme-button-color, #0088cc);
-        }
-
-        .coin-section {
-            text-align: center;
-            padding: 24px 16px;
-            margin-bottom: 16px;
-        }
-
-        .coin-input {
-            width: 100%;
-            max-width: 200px;
-            padding: 16px;
-            font-size: 32px;
-            font-weight: 700;
-            text-align: center;
-            border: 2px solid var(--tg-theme-button-color, #0088cc);
-            border-radius: 12px;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+            color: var(--tg-theme-hint-color, #64748b);
+            margin-bottom: 6px;
             text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
 
-        .coin-input:focus {
-            outline: none;
-            border-color: var(--tg-theme-button-color, #0088cc);
-            box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+        .chart-wrap {
+            margin-bottom: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
         }
 
-        .coin-input::placeholder {
-            color: var(--tg-theme-hint-color, #999);
-        }
-
-        .coin-suggestions {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 180px;
-            max-height: 180px;
-            overflow-y: auto;
-            background: var(--tg-theme-bg-color, #fff);
-            border: 2px solid var(--tg-theme-button-color, #0088cc);
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            margin-top: 2px;
-        }
-
-        .coin-suggestions.show {
+        .chart-wrap svg {
+            width: 100%;
+            height: 60px;
             display: block;
         }
 
-        .coin-suggestion-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            transition: background 0.2s;
-            color: var(--tg-theme-text-color, #000);
-        }
-
-        .coin-suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .coin-suggestion-item:hover {
-            background: rgba(0, 136, 204, 0.15);
-        }
-
-        .coin-suggestion-item.active {
-            background: var(--tg-theme-button-color, #0088cc) !important;
-            color: #ffffff !important;
-        }
-        
-        .coin-suggestion-item:hover .coin-suggestion-label {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-        
-        .coin-suggestion-item.active .coin-suggestion-label {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-
-        .coin-suggestion-item.recent {
-            background: rgba(0, 136, 204, 0.05);
-        }
-        
-        .coin-suggestion-item.recent:hover {
-            background: rgba(0, 136, 204, 0.15);
-        }
-
-        .coin-suggestion-label {
-            font-size: 10px;
-            color: var(--tg-theme-hint-color, #999);
-            font-weight: 400;
-            margin-top: 2px;
-        }
-
-        .availability-indicator {
-            margin-top: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
+        .chart-empty {
+            height: 60px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-weight: 500;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
         }
 
-        .availability-indicator.checking {
-            background: rgba(251, 191, 36, 0.1);
-            color: #f59e0b;
-            border: 1px solid rgba(251, 191, 36, 0.3);
+        /* Tier sections */
+        .tier-block {
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
         }
 
-        .availability-indicator.available {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+        .tier-block:last-child { margin-bottom: 0; }
+
+        .tier-label {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin-bottom: 7px;
         }
 
-        .availability-indicator.unavailable {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .availability-icon {
-            font-size: 16px;
-        }
-
-        .toggle-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .position-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            background: transparent;
-        }
-        
-        .position-status.checking {
-            color: #f59e0b;
-        }
-        
-        .position-status.available {
-            color: #10b981;
-        }
-        
-        .position-status.unavailable {
-            color: #ef4444;
-        }
-        
-        .position-status::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: currentColor;
-        }
-
-        .positions-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        @media (max-width: 480px) {
-            .positions-grid {
-                gap: 8px;
-            }
-        }
-
-        #spreadChart {
+        .btn-alert {
             width: 100%;
-            height: 300px;
-            margin-top: 16px;
-            border-radius: 8px;
-            overflow: hidden;
+            padding: 8px 14px;
+            background: rgba(0, 136, 204, 0.12);
+            border: none;
+            border-radius: 10px;
+            color: var(--tg-theme-button-color, #0088cc);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            transition: opacity 0.15s ease;
+        }
+
+        .btn-alert:active { opacity: 0.75; }
+
+        /* Locked orderbook */
+        .tier-locked {
             position: relative;
-        }
-        
-        .chart-legend {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            z-index: 10;
-            display: flex;
-            gap: 12px;
-            pointer-events: none;
-        }
-        
-        .legend-item {
-            background: rgba(30, 41, 59, 0.9);
-            padding: 6px 10px;
             border-radius: 6px;
+            overflow: hidden;
+            max-height: 90px;
+        }
+
+        .ob-mock {
+            filter: blur(4px);
+            pointer-events: none;
+            user-select: none;
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+            line-height: 2;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ob-ask { color: var(--color-danger); }
+        .ob-bid { color: var(--color-success); }
+
+        .lock-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent 0%, var(--tg-theme-secondary-bg-color, #f5f5f5) 60%);
             display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
+            align-items: flex-end;
+            padding-bottom: 4px;
+        }
+
+        .lock-label {
+            font-size: 11px;
             font-weight: 500;
-            color: #d1d5db;
+            color: var(--tg-theme-hint-color, #64748b);
         }
-        
-        .legend-status {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #6b7280;
+
+        /* Upgrade CTA button */
+        .tier-upgrade-btn {
+            display: block;
+            width: 100%;
+            height: 44px;
+            margin-top: 8px;
+            background: #2563eb;
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: opacity 0.15s ease;
         }
-        
-        .legend-status.online {
-            background-color: #10b981;
-            animation: pulse 2s infinite;
-        }
-        
-        .legend-label {
+
+        .tier-upgrade-btn:active { opacity: 0.8; }
+
+        /* Empty state CTA */
+        .empty-cta-btn {
+            display: block;
+            margin: 8px auto 0;
+            background: none;
+            border: 1px solid currentColor;
+            border-radius: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
             opacity: 0.7;
-            font-size: 10px;
-            margin-right: 4px;
+            font-family: inherit;
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #64748b);
+            -webkit-tap-highlight-color: transparent;
         }
 
-.nav-tabs {
-    padding: 10px 12px;
-    gap: 6px;
-}
+        /* Loading / error states */
+        .screener-status {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--tg-theme-hint-color, #64748b);
+            font-size: 14px;
+        }
 
-@media (min-width: 768px) {
-    .nav-tabs {
-        padding: 12px 16px;
-        gap: 8px;
-    }
-}
+        .screener-loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 136, 204, 0.2);
+            border-top-color: var(--tg-theme-button-color, #0088cc);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 8px;
+        }
 
-.nav-tab {
-    padding: 8px 10px;
-    font-size: 13px;
-}
-
-@media (min-width: 768px) {
-    .nav-tab {
-        padding: 10px 16px;
-        font-size: 14px;
-    }
-}
-
-.nav-icon {
-    font-size: 18px;
-}
-
-@media (min-width: 768px) {
-    .nav-icon {
-        font-size: 20px;
-    }
-}
-
-.nav-label {
-    font-size: 10px;
-}
-
-@media (min-width: 768px) {
-    .nav-label {
-        font-size: 11px;
-    }
-}
-
-.container {
-    padding: 12px;
-}
-
-@media (min-width: 768px) {
-    .container {
-        padding: 16px;
-    }
-}
-
-.strategy-card {
-    padding: 14px;
-    margin-bottom: 12px;
-}
-
-@media (min-width: 768px) {
-    .strategy-card {
-        padding: 16px;
-        margin-bottom: 16px;
-    }
-}
-
-button, .button {
-    padding: 10px 16px;
-    font-size: 14px;
-}
-
-@media (min-width: 768px) {
-    button, .button {
-        padding: 12px 20px;
-        font-size: 15px;
-    }
-}
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>⚡ Крипто Арбитраж</h1>
-            <p>Настройка стратегии</p>
-        </div>
+    <div class="viewport">
 
-        <div class="section coin-section">
-            <div class="input-group" style="position: relative;">
-                <input type="text" id="coinSymbol" placeholder="BTC" class="coin-input" autocomplete="off">
-                <div id="coinSuggestions" class="coin-suggestions"></div>
+        <div class="page-header">
+            <span class="page-title">Скринер</span>
+            <div class="live-badge" id="liveBadge">
+                <div class="live-dot"></div>
+                <span id="liveBadgeText">LIVE</span>
             </div>
         </div>
 
-        <div class="positions-grid">
-            <div class="section">
-                <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
-                    🔴 Шорт
-                    <span class="position-status" id="shortPositionStatus"></span>
-                </div>
-                
-                <div class="select-group">
-                    <label>Биржа</label>
-                    <select id="shortExchange">
-                        <option value="">Выберите</option>
-                        <option value="binance">Binance</option>
-                        <option value="bingx">BingX</option>
-                        <option value="bitget">Bitget</option>
-                        <option value="bitmart">BitMart</option>
-                        <option value="bitmex">Bitmex</option>
-                        <option value="bybit">Bybit</option>
-                        <option value="coinex">CoinEx</option>
-                        <option value="gateio">Gate.io</option>
-                        <option value="htx">HTX</option>
-                        <option value="hyperliquid">HyperLiquid</option>
-                        <option value="kucoin">KuCoin</option>
-                        <option value="lbank">LBank</option>
-                        <option value="mexc">MEXC</option>
-                        <option value="okx">OKX</option>
-                        <option value="ourbit">Ourbit</option>
-                        <option value="xt">XT</option>
-                    </select>
-                </div>
-
-                <div class="select-group">
-                    <label>Тип</label>
-                    <select id="shortType">
-                        <option value="futures">Фьючерс</option>
-                        <option value="spot">Спот</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
-                    🟢 Лонг
-                    <span class="position-status" id="longPositionStatus"></span>
-                </div>
-                
-                <div class="select-group">
-                    <label>Биржа</label>
-                    <select id="longExchange">
-                        <option value="">Выберите</option>
-                        <option value="binance">Binance</option>
-                        <option value="bingx">BingX</option>
-                        <option value="bitget">Bitget</option>
-                        <option value="bitmart">BitMart</option>
-                        <option value="bitmex">Bitmex</option>
-                        <option value="bybit">Bybit</option>
-                        <option value="coinex">CoinEx</option>
-                        <option value="gateio">Gate.io</option>
-                        <option value="htx">HTX</option>
-                        <option value="hyperliquid">HyperLiquid</option>
-                        <option value="kucoin">KuCoin</option>
-                        <option value="lbank">LBank</option>
-                        <option value="mexc">MEXC</option>
-                        <option value="okx">OKX</option>
-                        <option value="ourbit">Ourbit</option>
-                        <option value="xt">XT</option>
-                    </select>
-                </div>
-
-                <div class="select-group">
-                    <label>Тип</label>
-                    <select id="longType">
-                        <option value="futures">Фьючерс</option>
-                        <option value="spot">Спот</option>
-                    </select>
-                </div>
-            </div>
+        <div class="strategy-tabs" id="strategyTabs">
+            <button class="strat-tab strat-active" data-strategy="arb">Арбитраж</button>
+            <button class="strat-tab" data-strategy="funding">Фандинг</button>
+            <button class="strat-tab" data-strategy="combo">Комбо</button>
         </div>
 
-        <div class="section">
-            <button id="toggleOnline" class="toggle-button">
-                <span class="status-indicator" id="statusIndicator"></span>
-                <span id="toggleText">Online спред + фандинг</span>
-            </button>
-            
-            <div id="onlineData" class="online-data" style="display: none;">
-                <div class="spreads-row">
-                    <div class="spread-item">
-                        <div class="spread-label">📈 Вход</div>
-                        <div class="spread-value" id="liveEntrySpread">--%</div>
-                    </div>
-                    <div class="spread-item">
-                        <div class="spread-label">📉 Выход</div>
-                        <div class="spread-value" id="liveExitSpread">--%</div>
-                    </div>
-                    <div class="spread-item">
-                        <div class="spread-label">💰 Фандинг</div>
-                        <div class="spread-value" id="liveFunding">--%</div>
-                    </div>
-                </div>
-                
-                <div id="spreadChart">
-                    <div class="chart-legend">
-                        <div class="legend-item">
-                            <span class="legend-label">SHORT</span>
-                            <span class="legend-status" id="chartShortStatus"></span>
-                            <span id="chartShortName">-</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-label">LONG</span>
-                            <span class="legend-status" id="chartLongStatus"></span>
-                            <span id="chartLongName">-</span>
-                        </div>
-                    </div>
-                </div>
+        <div class="cards-list" id="cardsList">
+            <div class="screener-status">
+                <div class="screener-loader"></div>
+                <div>Загрузка данных...</div>
             </div>
         </div>
+        <div id="sentinel"></div>
 
-        <div class="section">
-            <div class="section-title">Параметры входа/выхода</div>
-            
-            <div class="input-group">
-                <label>📈 Спред входа</label>
-                <div class="input-suffix">
-                    <input type="number" id="entrySpread" value="1.5" step="0.1" min="0" placeholder="1.5">
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>📉 Спред выхода</label>
-                <div class="input-suffix">
-                    <input type="number" id="exitSpread" value="0.5" step="0.1" min="0" placeholder="0.5">
-                </div>
-            </div>
-
-            <div id="tradeActions" class="trade-actions">
-                <button id="tradeButton" type="button" class="trade-button">Торговать</button>
-                <div id="tradeFeedback" class="trade-feedback"></div>
-            </div>
-        </div>
-
-        <div class="profit-display">
-            <div class="profit-label">Ожидаемая прибыль</div>
-            <div class="profit-value" id="profitValue">0.00%</div>
-            <div class="profit-description">Разница между входом и выходом</div>
-        </div>
-
-        <div class="info-box">
-            <strong>📋 Стратегия:</strong>
-            <div class="strategy-preview" id="strategyPreview">
-                Выберите биржи и установите спреды для просмотра стратегии
-            </div>
-        </div>
     </div>
 
     <div class="nav-tabs">
         <a href="index.html" class="nav-tab active">
             <span class="nav-icon">📊</span>
-            <span class="nav-label">Стратегия</span>
+            <span class="nav-label">Скринер</span>
         </a>
         <a href="deals.html" class="nav-tab">
             <span class="nav-icon">📑</span>
@@ -866,1143 +446,686 @@ button, .button {
     </div>
 
     <script>
-        let tg = window.Telegram?.WebApp;
+        var tg = window.Telegram && window.Telegram.WebApp;
         if (tg) {
             tg.expand();
             tg.ready();
         }
 
-        const coinSymbol = document.getElementById('coinSymbol');
-        const coinSuggestions = document.getElementById('coinSuggestions');
-        const shortExchange = document.getElementById('shortExchange');
-        const shortType = document.getElementById('shortType');
-        const longExchange = document.getElementById('longExchange');
-        const longType = document.getElementById('longType');
-        const entrySpread = document.getElementById('entrySpread');
-        const exitSpread = document.getElementById('exitSpread');
-        const tradeActions = document.getElementById('tradeActions');
-        const tradeButton = document.getElementById('tradeButton');
-        const tradeFeedback = document.getElementById('tradeFeedback');
-        const profitValue = document.getElementById('profitValue');
-        const strategyPreview = document.getElementById('strategyPreview');
-        
-        const defaultCoins = [
-            'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'ADA', 'AVAX', 'DOGE', 'DOT', 'MATIC',
-            'SHIB', 'LTC', 'TRX', 'LINK', 'UNI', 'ATOM', 'XLM', 'TON', 'FIL', 'NEAR',
-            'APT', 'ARB', 'OP', 'SUI', 'INJ', 'SEI', 'WLD', 'PEPE', 'FET', 'RENDER'
-        ];
-        
-        function loadUserCoins() {
-            const saved = localStorage.getItem('userCoins');
-            return saved ? JSON.parse(saved) : [];
+        var API_BASE = 'http://localhost:8000';
+        var PAGE_SIZE = 15;
+
+        /* ── State ───────────────────────────────────────────────── */
+        var currentTab = 'arbitrage';
+        var sortDir = 'desc';
+        var currentSortBy = 'spread_pct';
+        var pollIntervalId = null;
+        var lastFetchFailed = false;
+        var currentOffset = 0;
+        var lastItems = [];
+        var isPaused = false;
+        var _debounceTimer = null;
+        var _pauseTimer = null;
+        var _abortController = null;
+
+        /* История спредов для мини-графиков: ключ = "coin|long|short" */
+        window._spreadHistory = {};
+
+        /* ── Helpers ─────────────────────────────────────────────── */
+
+        function fmtPct(val) {
+            if (val === null || val === undefined || isNaN(val)) return '—';
+            var sign = val >= 0 ? '+' : '';
+            return sign + parseFloat(val).toFixed(3) + '%';
         }
-        
-        function saveUserCoin(coin) {
-            const userCoins = loadUserCoins();
-            const upperCoin = coin.toUpperCase();
-            
-            if (!userCoins.includes(upperCoin) && !defaultCoins.includes(upperCoin)) {
-                userCoins.unshift(upperCoin);
-                
-                if (userCoins.length > 50) {
-                    userCoins.pop();
-                }
-                
-                localStorage.setItem('userCoins', JSON.stringify(userCoins));
-                console.log('💾 Сохранена новая монета:', upperCoin);
+
+        function spreadPillClass(pct) {
+            if (pct >= 0.5) return 'pill-green';
+            if (pct >= 0)   return 'pill-yellow';
+            return 'pill-red';
+        }
+
+        function fundingValClass(val) {
+            if (val > 0) return 'val-green';
+            if (val < 0) return 'val-red';
+            return 'val-dim';
+        }
+
+        function haptic(type) {
+            if (tg && tg.HapticFeedback) {
+                if (type === 'selection') tg.HapticFeedback.selectionChanged();
+                else tg.HapticFeedback.impactOccurred(type || 'light');
             }
         }
-        
-        function getAllCoins() {
-            const userCoins = loadUserCoins();
-            return [...userCoins, ...defaultCoins];
+
+        /* ── History accumulation ────────────────────────────────── */
+
+        function addToHistory(item) {
+            var key = item.coin + '|' + item.long_exchange + '|' + item.short_exchange;
+            if (!window._spreadHistory[key]) {
+                window._spreadHistory[key] = [];
+            }
+            var hist = window._spreadHistory[key];
+            hist.push(item.spread_pct);
+            if (hist.length > 60) hist.shift();
         }
-        
-        function filterCoins(query) {
-            if (!query) return [];
-            
-            const upperQuery = query.toUpperCase();
-            const allCoins = getAllCoins();
-            const userCoins = loadUserCoins();
-            
-            return allCoins
-                .filter(coin => coin.startsWith(upperQuery))
-                .slice(0, 10)
-                .map(coin => ({
-                    symbol: coin,
-                    isRecent: userCoins.includes(coin)
-                }));
+
+        /* ── SVG sparkline ───────────────────────────────────────── */
+
+        function buildSparkline(points) {
+            /* points: array of numbers */
+            if (!points || points.length < 2) return null;
+
+            var W = 280, H = 60, pad = 4;
+            var min = Math.min.apply(null, points);
+            var max = Math.max.apply(null, points);
+            var range = max - min || 1;
+
+            var pts = points.map(function(v, i) {
+                var x = pad + (i / (points.length - 1)) * (W - pad * 2);
+                var y = H - pad - ((v - min) / range) * (H - pad * 2);
+                return x.toFixed(1) + ',' + y.toFixed(1);
+            }).join(' ');
+
+            return pts;
         }
-        
-        function showSuggestions(suggestions) {
-            if (suggestions.length === 0) {
-                coinSuggestions.classList.remove('show');
+
+        function renderSparklineInto(el, key) {
+            var hist = window._spreadHistory[key];
+            var pts = hist && hist.length >= 2 ? buildSparkline(hist) : null;
+
+            if (!pts) {
+                el.innerHTML = '<div class="chart-empty">Накапливается...</div>';
                 return;
             }
-            
-            coinSuggestions.innerHTML = suggestions.map(item => `
-                <div class="coin-suggestion-item ${item.isRecent ? 'recent' : ''}" data-coin="${item.symbol}">
-                    ${item.symbol}
-                    ${item.isRecent ? '<div class="coin-suggestion-label">недавно использовано</div>' : ''}
-                </div>
-            `).join('');
-            
-            coinSuggestions.classList.add('show');
-            
-            coinSuggestions.querySelectorAll('.coin-suggestion-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const coin = item.dataset.coin;
-                    coinSymbol.value = coin;
-                    coinSuggestions.classList.remove('show');
-                    calculateProfit();
-                    
-                    if (shortExchange.value) scheduleShortCheck();
-                    if (longExchange.value) scheduleLongCheck();
+
+            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 280 60');
+            svg.style.width = '100%';
+            svg.style.height = '60px';
+            svg.style.display = 'block';
+
+            var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            polyline.setAttribute('points', pts);
+            polyline.setAttribute('fill', 'none');
+            polyline.setAttribute('stroke', (tg && tg.themeParams && tg.themeParams.button_color) || '#0088cc');
+            polyline.setAttribute('stroke-width', '2');
+            polyline.setAttribute('stroke-linejoin', 'round');
+            polyline.setAttribute('stroke-linecap', 'round');
+
+            svg.appendChild(polyline);
+
+            el.innerHTML = '';
+            el.appendChild(svg);
+        }
+
+        /* ── Card rendering ──────────────────────────────────────── */
+
+        function buildCard(item) {
+            var key = item.coin + '|' + item.long_exchange + '|' + item.short_exchange;
+            var pct = typeof item.spread_pct === 'number' ? item.spread_pct : 0;
+            var pillCls = spreadPillClass(pct);
+            var flVal = typeof item.funding_long === 'number' ? item.funding_long : 0;
+            var fsVal = typeof item.funding_short === 'number' ? item.funding_short : 0;
+            var totalVal = typeof item.total_yield_pct === 'number' ? item.total_yield_pct : 0;
+
+            /* Outer card */
+            var card = document.createElement('div');
+            card.className = 'card stat-card';
+            card.dataset.key = key;
+
+            /* Row 1: coin + pill */
+            var top = document.createElement('div');
+            top.className = 'card-top';
+
+            var coinEl = document.createElement('span');
+            coinEl.className = 'card-coin-name';
+            coinEl.textContent = item.coin;
+
+            var pill = document.createElement('span');
+            pill.className = 'spread-pill ' + pillCls;
+            pill.textContent = fmtPct(pct);
+
+            top.appendChild(coinEl);
+            top.appendChild(pill);
+
+            /* Row 2: exchanges */
+            var exRow = document.createElement('div');
+            exRow.className = 'card-exchanges';
+
+            var tagL = document.createElement('span');
+            tagL.className = 'tag-l';
+            tagL.textContent = 'L';
+
+            var longBlock = document.createElement('span');
+            longBlock.className = 'exch-block';
+            var longName = document.createElement('span');
+            longName.className = 'exch-name';
+            longName.textContent = item.long_exchange;
+            longBlock.appendChild(longName);
+            if (item.price_long != null) {
+                var longPrice = document.createElement('span');
+                longPrice.className = 'exch-price';
+                var pLong = parseFloat(item.price_long);
+                longPrice.textContent = '$' + pLong.toLocaleString('en-US', { maximumFractionDigits: pLong >= 1 ? 2 : 6 });
+                longBlock.appendChild(longPrice);
+            }
+
+            var arrow = document.createElement('span');
+            arrow.className = 'exch-arrow';
+            arrow.textContent = '→';
+
+            var tagS = document.createElement('span');
+            tagS.className = 'tag-s';
+            tagS.textContent = 'S';
+
+            var shortBlock = document.createElement('span');
+            shortBlock.className = 'exch-block';
+            var shortName = document.createElement('span');
+            shortName.className = 'exch-name';
+            shortName.textContent = item.short_exchange;
+            shortBlock.appendChild(shortName);
+            if (item.price_short != null) {
+                var shortPrice = document.createElement('span');
+                shortPrice.className = 'exch-price';
+                var pShort = parseFloat(item.price_short);
+                shortPrice.textContent = '$' + pShort.toLocaleString('en-US', { maximumFractionDigits: pShort >= 1 ? 2 : 6 });
+                shortBlock.appendChild(shortPrice);
+            }
+
+            exRow.appendChild(tagL);
+            exRow.appendChild(longBlock);
+            exRow.appendChild(arrow);
+            exRow.appendChild(tagS);
+            exRow.appendChild(shortBlock);
+
+            /* Row 3: stat blocks */
+            var stats = document.createElement('div');
+            stats.className = 'card-stats';
+
+            function makeStatBlock(lbl, valText, valCls) {
+                var blk = document.createElement('div');
+                blk.className = 'stat-block';
+                var lblEl = document.createElement('span');
+                lblEl.className = 'stat-lbl';
+                lblEl.textContent = lbl;
+                var valEl = document.createElement('span');
+                valEl.className = 'stat-val ' + valCls;
+                valEl.textContent = valText;
+                blk.appendChild(lblEl);
+                blk.appendChild(valEl);
+                return blk;
+            }
+
+            var fundingNet = fsVal - flVal;
+            stats.appendChild(makeStatBlock('Фандинг', fmtPct(fundingNet), fundingValClass(fundingNet)));
+            stats.appendChild(makeStatBlock('Итого', fmtPct(totalVal), totalVal >= 0.5 ? 'val-green' : totalVal < 0 ? 'val-red' : 'val-dim'));
+            stats.appendChild(makeStatBlock('Объём', '--', 'val-dim'));
+
+            /* Detail block (hidden until expand) */
+            var detail = document.createElement('div');
+            detail.className = 'card-detail';
+
+            var inner = document.createElement('div');
+            inner.className = 'detail-inner';
+
+            /* Chart caption */
+            var chartCap = document.createElement('div');
+            chartCap.className = 'chart-caption';
+            chartCap.textContent = 'График спреда · текущая сессия';
+
+            /* Chart wrap */
+            var chartWrap = document.createElement('div');
+            chartWrap.className = 'chart-wrap';
+            chartWrap.dataset.chartKey = key;
+            chartWrap.innerHTML = '<div class="chart-empty">Накапливается...</div>';
+
+            /* Tier block: Free — Alert */
+            var tierFree = document.createElement('div');
+            tierFree.className = 'tier-block';
+
+            var tierFreeLabel = document.createElement('div');
+            tierFreeLabel.className = 'tier-label';
+            tierFreeLabel.textContent = 'Доступно Free';
+
+            var btnAlert = document.createElement('button');
+            btnAlert.className = 'btn-alert';
+            btnAlert.textContent = 'Настроить алерт';
+            btnAlert.addEventListener('click', function(e) {
+                e.stopPropagation();
+                haptic('light');
+                /* TODO: открыть форму алерта */
+            });
+
+            tierFree.appendChild(tierFreeLabel);
+            tierFree.appendChild(btnAlert);
+
+            /* Tier block: Paid 1 — locked orderbook */
+            var tierPaid = document.createElement('div');
+            tierPaid.className = 'tier-block';
+
+            var tierPaidLabel = document.createElement('div');
+            tierPaidLabel.className = 'tier-label';
+            tierPaidLabel.textContent = 'Узнай максимальный вход без проскальзывания · Paid 1';
+
+            var tierLocked = document.createElement('div');
+            tierLocked.className = 'tier-locked';
+
+            var obMock = document.createElement('div');
+            obMock.className = 'ob-mock';
+
+            var mockRows = [
+                { cls: 'ob-ask', qty: '0.1823 BTC', price: '95,420 USDT' },
+                { cls: 'ob-ask', qty: '0.3541 BTC', price: '95,415 USDT' },
+                { cls: 'ob-ask', qty: '0.8120 BTC', price: '95,410 USDT' },
+                { cls: 'ob-bid', qty: '0.2234 BTC', price: '95,405 USDT' },
+                { cls: 'ob-bid', qty: '0.4892 BTC', price: '95,400 USDT' },
+                { cls: 'ob-bid', qty: '0.6017 BTC', price: '95,395 USDT' }
+            ];
+
+            mockRows.forEach(function(row) {
+                var line = document.createElement('div');
+                var span = document.createElement('span');
+                span.className = row.cls;
+                span.textContent = row.qty;
+                line.appendChild(span);
+                line.appendChild(document.createTextNode('  @  ' + row.price));
+                obMock.appendChild(line);
+            });
+
+            var lockOverlay = document.createElement('div');
+            lockOverlay.className = 'lock-overlay';
+            var lockLabel = document.createElement('span');
+            lockLabel.className = 'lock-label';
+            lockLabel.textContent = 'Узнай максимальный вход без проскальзывания · Paid 1';
+            lockOverlay.appendChild(lockLabel);
+
+            tierLocked.appendChild(obMock);
+            tierLocked.appendChild(lockOverlay);
+
+            var upgradeBtn = document.createElement('button');
+            upgradeBtn.className = 'tier-upgrade-btn';
+            upgradeBtn.textContent = 'Открыть доступ · Paid 1';
+            upgradeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                haptic('light');
+                window.open('https://t.me/your_bot?start=upgrade', '_blank');
+            });
+
+            tierPaid.appendChild(tierPaidLabel);
+            tierPaid.appendChild(tierLocked);
+            tierPaid.appendChild(upgradeBtn);
+
+            inner.appendChild(chartCap);
+            inner.appendChild(chartWrap);
+            inner.appendChild(tierFree);
+            inner.appendChild(tierPaid);
+
+            detail.appendChild(inner);
+
+            /* Details button */
+            var detBtn = document.createElement('button');
+            detBtn.className = 'details-btn';
+
+            var detBtnText = document.createTextNode('Подробнее ▼');
+            var chevron = document.createElement('span');
+            chevron.className = 'details-chevron';
+            chevron.textContent = '';
+
+            detBtn.appendChild(detBtnText);
+            detBtn.appendChild(chevron);
+
+            detBtn.addEventListener('click', function() {
+                var wasExpanded = card.classList.contains('expanded');
+                card.classList.toggle('expanded');
+                haptic('light');
+
+                detBtnText.nodeValue = wasExpanded ? 'Подробнее ▼' : 'Свернуть ▲';
+
+                if (!wasExpanded) {
+                    /* При открытии перерисовываем спарклайн */
+                    renderSparklineInto(chartWrap, key);
+                }
+            });
+
+            /* Assemble */
+            card.appendChild(top);
+            card.appendChild(exRow);
+            card.appendChild(stats);
+            card.appendChild(detail);
+            card.appendChild(detBtn);
+
+            return card;
+        }
+
+        function setTab(tabName) {
+            var target = document.querySelector('#strategyTabs .strat-tab[data-strategy="' + tabName + '"]');
+            if (target) {
+                document.querySelectorAll('#strategyTabs .strat-tab').forEach(function(b) {
+                    b.classList.remove('strat-active');
+                    if (b.dataset.label) b.textContent = b.dataset.label;
                 });
+                target.classList.add('strat-active');
+                currentTab = tabName;
+                sortDir = 'desc';
+                currentSortBy = (tabSortMap && tabSortMap[tabName]) || target.dataset.sort || 'spread_pct';
+                if (target.dataset.label) {
+                    target.textContent = target.dataset.label + ' ↓';
+                }
+                haptic('selection');
+                fetchDebounced();
+            }
+        }
+
+        function renderCards(items) {
+            var list = document.getElementById('cardsList');
+            if (!items || items.length === 0) {
+                list.innerHTML = '';
+                var empty = document.createElement('div');
+                empty.className = 'screener-status';
+                empty.textContent = 'Нет пар по выбранным фильтрам.';
+                var ctaBtn = document.createElement('button');
+                ctaBtn.className = 'empty-cta-btn';
+                ctaBtn.textContent = 'Попробуй вкладку Комбо →';
+                ctaBtn.addEventListener('click', function() { setTab('combo'); });
+                list.appendChild(empty);
+                list.appendChild(ctaBtn);
+                return;
+            }
+
+            /* Сохраняем текущие expanded-ключи чтобы не схлопывать при ре-рендере */
+            var expandedKeys = {};
+            list.querySelectorAll('.stat-card.expanded').forEach(function(c) {
+                expandedKeys[c.dataset.key] = true;
+            });
+
+            /* Удаляем старые карточки и статус */
+            list.innerHTML = '';
+
+            items.forEach(function(item) {
+                var card = buildCard(item);
+                if (expandedKeys[card.dataset.key]) {
+                    card.classList.add('expanded');
+                    /* Перерисуем чарт для раскрытых карточек */
+                    var chartWrap = card.querySelector('[data-chart-key]');
+                    if (chartWrap) {
+                        renderSparklineInto(chartWrap, card.dataset.key);
+                    }
+                }
+                list.appendChild(card);
             });
         }
-        
-        coinSymbol.addEventListener('input', (e) => {
-            const query = e.target.value;
-            const suggestions = filterCoins(query);
-            showSuggestions(suggestions);
-            calculateProfit();
-            
-            const coin = query.trim();
-            if (coin.length >= 1) {
-                if (shortExchange.value) scheduleShortCheck();
-                if (longExchange.value) scheduleLongCheck();
-            }
-        });
-        
-        document.addEventListener('click', (e) => {
-            if (!coinSymbol.contains(e.target) && !coinSuggestions.contains(e.target)) {
-                coinSuggestions.classList.remove('show');
-            }
-        });
-        
-        let selectedIndex = -1;
-        coinSymbol.addEventListener('keydown', (e) => {
-            const items = coinSuggestions.querySelectorAll('.coin-suggestion-item');
-            
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                updateSelection(items);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                selectedIndex = Math.max(selectedIndex - 1, -1);
-                updateSelection(items);
-            } else if (e.key === 'Enter' && selectedIndex >= 0) {
-                e.preventDefault();
-                items[selectedIndex].click();
-                selectedIndex = -1;
-            } else if (e.key === 'Escape') {
-                coinSuggestions.classList.remove('show');
-                selectedIndex = -1;
-            }
-        });
-        
-        function updateSelection(items) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    item.classList.add('active');
-                    item.scrollIntoView({ block: 'nearest' });
-                } else {
-                    item.classList.remove('active');
-                }
+
+        /* ── Append cards (infinite scroll) ─────────────────────── */
+
+        function appendCards(items) {
+            if (!items || items.length === 0) return;
+            var list = document.getElementById('cardsList');
+            items.forEach(function(item) {
+                var card = buildCard(item);
+                list.appendChild(card);
             });
         }
-        
-        const toggleOnline = document.getElementById('toggleOnline');
-        const statusIndicator = document.getElementById('statusIndicator');
-        const toggleText = document.getElementById('toggleText');
-        const onlineData = document.getElementById('onlineData');
-        const liveEntrySpread = document.getElementById('liveEntrySpread');
-        const liveExitSpread = document.getElementById('liveExitSpread');
-        const liveFunding = document.getElementById('liveFunding');
-        
-        const shortPositionStatus = document.getElementById('shortPositionStatus');
-        const longPositionStatus = document.getElementById('longPositionStatus');
-        
-        const chartShortStatus = document.getElementById('chartShortStatus');
-        const chartShortName = document.getElementById('chartShortName');
-        const chartLongStatus = document.getElementById('chartLongStatus');
-        const chartLongName = document.getElementById('chartLongName');
-        
-        let shortCoinAvailable = false;
-        let longCoinAvailable = false;
-        
-        let shortExchangeStatus = 'offline';
-        let longExchangeStatus = 'offline';
-        
-        const STRATEGY_STATE_KEY = 'strategyFormState';
-        let isRestoringStrategyState = false;
 
-        function updateChartExchangeStatus(type, exchange, status) {
-            if (type === 'short') {
-                const name = exchange ? shortExchange.options[shortExchange.selectedIndex].text : '-';
-                chartShortName.textContent = name;
-                
-                if (status === 'online') {
-                    chartShortStatus.classList.add('online');
-                } else {
-                    chartShortStatus.classList.remove('online');
-                }
-                shortExchangeStatus = status;
-            } else if (type === 'long') {
-                const name = exchange ? longExchange.options[longExchange.selectedIndex].text : '-';
-                chartLongName.textContent = name;
-                
-                if (status === 'online') {
-                    chartLongStatus.classList.add('online');
-                } else {
-                    chartLongStatus.classList.remove('online');
-                }
-                longExchangeStatus = status;
-            }
-        }
-        
-        let isOnline = false;
-        let startTimeoutId = null;
-        let checkTimeout = null;
-        let pollTimeoutId = null;
-        let isPolling = false;
-        let activeFetchController = null;
-        
-        let chart = null;
-        let entrySpreadSeries = null;
-        let exitSpreadSeries = null;
-        let entryLevelLine = null;
-        let exitLevelLine = null;
-        let autoScroll = true;
+        /* ── Fetch ───────────────────────────────────────────────── */
 
-        function setSelectValue(selectElement, value) {
-            if (!selectElement || !value) {
-                return false;
-            }
-            const options = Array.from(selectElement.options || []);
-            const hasOption = options.some(option => option.value === value);
-            if (hasOption) {
-                selectElement.value = value;
-                return true;
-            }
-            return false;
-        }
+        function fetchSpreads(opts) {
+            /* opts: { append: bool, offset: number, limit: number } */
+            opts = opts || {};
+            var limit  = opts.limit  !== undefined ? opts.limit  : PAGE_SIZE;
+            var offset = opts.offset !== undefined ? opts.offset : 0;
+            var append = !!opts.append;
 
-        function loadStrategyState() {
-            try {
-                const raw = localStorage.getItem(STRATEGY_STATE_KEY);
-                return raw ? JSON.parse(raw) : null;
-            } catch (error) {
-                console.warn('Не удалось загрузить сохранённую стратегию:', error);
-                return null;
+            /* Отменяем предыдущий запрос */
+            if (_abortController) {
+                _abortController.abort();
             }
-        }
+            _abortController = new AbortController();
+            var signal = _abortController.signal;
 
-        function saveStrategyState(overrides = {}) {
-            if (isRestoringStrategyState) {
-                return;
-            }
-            try {
-                const baseState = {
-                    coin: coinSymbol.value.trim().toUpperCase(),
-                    shortExchange: shortExchange.value,
-                    shortType: shortType.value,
-                    longExchange: longExchange.value,
-                    longType: longType.value,
-                    entrySpread: entrySpread.value,
-                    exitSpread: exitSpread.value,
-                    isOnline: Boolean(isOnline),
-                };
-                const state = { ...baseState, ...overrides };
-                localStorage.setItem(STRATEGY_STATE_KEY, JSON.stringify(state));
-            } catch (error) {
-                console.warn('Не удалось сохранить параметры стратегии:', error);
-            }
-        }
+            var url = API_BASE + '/api/spreads?sort_by=' + encodeURIComponent(currentSortBy)
+                    + '&limit=' + limit + '&offset=' + offset;
 
-        function setOnlineMode(enabled) {
-            if (Boolean(enabled) !== isOnline) {
-                toggleOnlineMode();
-            }
-        }
-
-        function restoreStrategyState() {
-            const state = loadStrategyState();
-            if (!state) {
-                return;
-            }
-
-            isRestoringStrategyState = true;
-            try {
-                if (state.coin) {
-                    coinSymbol.value = state.coin.toUpperCase();
-                }
-                setSelectValue(shortExchange, state.shortExchange);
-                setSelectValue(shortType, state.shortType);
-                setSelectValue(longExchange, state.longExchange);
-                setSelectValue(longType, state.longType);
-                if (state.entrySpread !== undefined) {
-                    entrySpread.value = state.entrySpread;
-                }
-                if (state.exitSpread !== undefined) {
-                    exitSpread.value = state.exitSpread;
-                }
-            } finally {
-                isRestoringStrategyState = false;
-            }
-
-            calculateProfit();
-            updateOnlineButton();
-
-            const coin = coinSymbol.value.trim();
-            if (coin.length >= 1 && shortExchange.value) {
-                scheduleShortCheck();
-            }
-            if (coin.length >= 1 && longExchange.value) {
-                scheduleLongCheck();
-            }
-            if (state.isOnline) {
-                setOnlineMode(true);
-            }
-        }
-        
-        async function checkCoinAvailability(exchange, coin, type, statusElement) {
-        if (!exchange || !coin || coin.length < 1) {
-                statusElement.style.display = 'none';
-                return false;
-            }
-            
-            statusElement.style.display = 'inline-flex';
-            statusElement.className = 'position-status checking';
-            statusElement.textContent = 'Проверка';
-            
-            const API_URL = 'http://localhost:8000';
-            
-            try {
-                const response = await fetch(`${API_URL}/api/price?exchange=${exchange}&coin=${coin.toUpperCase()}&type=${type}`);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.price && data.price > 0) {
-                        statusElement.className = 'position-status available';
-                        statusElement.textContent = 'Доступна';
-                        return true;
+            fetch(url, { signal: signal })
+                .then(function(resp) {
+                    if (resp.status === 429) {
+                        return null;
                     }
-                }
-                
-                statusElement.className = 'position-status unavailable';
-                statusElement.textContent = 'Нет монеты';
-                return false;
-                
-            } catch (error) {
-                console.error('Ошибка проверки доступности:', error);
-                statusElement.className = 'position-status unavailable';
-                statusElement.textContent = 'Ошибка';
-                return false;
-            }
-        }
-        
-        async function checkShortPosition() {
-            const coin = coinSymbol.value.trim().toUpperCase();
-            const shortEx = shortExchange.value;
-            const shortT = shortType.value;
-            
-        if (shortEx && coin.length >= 1) {
-                shortCoinAvailable = await checkCoinAvailability(shortEx, coin, shortT, shortPositionStatus);
-                updateOnlineButton();
-            }
-        }
-        
-        async function checkLongPosition() {
-            const coin = coinSymbol.value.trim().toUpperCase();
-            const longEx = longExchange.value;
-            const longT = longType.value;
-            
-        if (longEx && coin.length >= 1) {
-                longCoinAvailable = await checkCoinAvailability(longEx, coin, longT, longPositionStatus);
-                updateOnlineButton();
-            }
-        }
-        
-        function updateOnlineButton() {
-            const coin = coinSymbol.value.trim();
-        const hasShort = shortExchange.value && coin.length >= 1;
-        const hasLong = longExchange.value && coin.length >= 1;
-            const bothAvailable = shortCoinAvailable && longCoinAvailable;
-            
-            if (hasShort && hasLong && bothAvailable) {
-                toggleOnline.disabled = false;
-            } else {
-                toggleOnline.disabled = true;
-            }
-
-            updateTradeButtonState();
-        }
-        
-        let shortCheckTimeout = null;
-        let longCheckTimeout = null;
-        
-        function scheduleShortCheck() {
-            if (shortCheckTimeout) {
-                clearTimeout(shortCheckTimeout);
-            }
-            shortCheckTimeout = setTimeout(checkShortPosition, 500);
-        }
-        
-        function scheduleLongCheck() {
-            if (longCheckTimeout) {
-                clearTimeout(longCheckTimeout);
-            }
-            longCheckTimeout = setTimeout(checkLongPosition, 500);
-        }
-
-        function calculateProfit() {
-            const entry = parseFloat(entrySpread.value) || 0;
-            const exit = parseFloat(exitSpread.value) || 0;
-            const profit = entry - exit;
-            
-            profitValue.textContent = profit.toFixed(2) + '%';
-            profitValue.className = 'profit-value ' + (profit > 0 ? 'positive' : profit < 0 ? 'negative' : '');
-            
-            updateStrategyPreview();
-            updateTradeButtonState();
-            if (!isRestoringStrategyState) {
-                saveStrategyState();
-            }
-        }
-
-        function updateStrategyPreview() {
-            const short = shortExchange.value;
-            const long = longExchange.value;
-            const coin = coinSymbol.value.toUpperCase() || 'МОНЕТА';
-            const sType = shortType.options[shortType.selectedIndex].text;
-            const lType = longType.options[longType.selectedIndex].text;
-            const entry = parseFloat(entrySpread.value) || 0;
-            const exit = parseFloat(exitSpread.value) || 0;
-            
-            if (!short || !long) {
-                strategyPreview.innerHTML = 'Выберите биржи и установите спреды для просмотра стратегии';
-                return;
-            }
-            
-            const shortName = shortExchange.options[shortExchange.selectedIndex].text;
-            const longName = longExchange.options[longExchange.selectedIndex].text;
-            
-            strategyPreview.innerHTML = `
-                <strong>Вход в позицию:</strong><br>
-                Когда спред достигнет <strong>${entry}%</strong>:<br>
-                • Открыть SHORT на <strong>${shortName}</strong> (${coin}/${sType})<br>
-                • Открыть LONG на <strong>${longName}</strong> (${coin}/${lType})<br>
-                <br>
-                <strong>Выход из позиции:</strong><br>
-                Когда спред сузится до <strong>${exit}%</strong>:<br>
-                • Закрыть обе позиции<br>
-                • Зафиксировать прибыль <strong>~${(entry - exit).toFixed(2)}%</strong>
-            `;
-        }
-
-        function parsePercentValue(text) {
-            if (!text) return null;
-            const cleaned = text.replace('%', '').replace(',', '.').trim();
-            const value = parseFloat(cleaned);
-            return Number.isFinite(value) ? value : null;
-        }
-
-        function buildTradeNotes(liveEntryValue, liveExitValue) {
-            const parts = [];
-            if (Number.isFinite(liveEntryValue)) {
-                parts.push(`Live entry: ${liveEntryValue.toFixed(2)}%`);
-            }
-            if (Number.isFinite(liveExitValue)) {
-                parts.push(`Live exit: ${liveExitValue.toFixed(2)}%`);
-            }
-            if (!parts.length) {
-                return null;
-            }
-            const timestamp = new Date().toLocaleString('ru-RU');
-            return `${parts.join(' | ')} · ${timestamp}`;
-        }
-
-        function escapeHtml(value) {
-            if (value === null || value === undefined) return '';
-            return value
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function resetTradeFeedback() {
-            if (!tradeFeedback) return;
-            tradeFeedback.className = 'trade-feedback';
-            tradeFeedback.style.display = 'none';
-            tradeFeedback.textContent = '';
-        }
-
-        function showTradeFeedback(type, message) {
-            if (!tradeFeedback) return;
-            tradeFeedback.className = `trade-feedback ${type === 'error' ? 'error' : 'success'}`;
-            tradeFeedback.innerHTML = message;
-            tradeFeedback.style.display = 'block';
-        }
-
-        function updateTradeButtonState() {
-            if (!tradeButton || !tradeActions) return;
-
-            const coin = coinSymbol.value.trim().toUpperCase();
-            const short = shortExchange.value;
-            const long = longExchange.value;
-            const entry = parseFloat(entrySpread.value);
-            const exit = parseFloat(exitSpread.value);
-
-            const readyToTrade = Boolean(
-                isOnline &&
-                coin.length >= 1 &&
-                short &&
-                long &&
-                (short !== long || shortType.value !== longType.value)
-            );
-
-            if (readyToTrade) {
-                tradeActions.style.display = 'block';
-            } else {
-                tradeActions.style.display = 'none';
-                resetTradeFeedback();
-            }
-
-            const hasNumbers = Number.isFinite(entry) && Number.isFinite(exit);
-            tradeButton.disabled = !(readyToTrade && hasNumbers);
-            tradeButton.title = readyToTrade && hasNumbers
-                ? 'Совершить сделку по выбранной стратегии'
-                : 'Укажите монету, биржи и спреды, чтобы начать торговлю';
-        }
-
-        async function handleTradeClick() {
-            if (!tradeButton || tradeButton.disabled) {
-                return;
-            }
-
-            const coin = coinSymbol.value.trim().toUpperCase();
-            const payload = {
-                coin,
-                short_exchange: shortExchange.value,
-                short_type: shortType.value,
-                long_exchange: longExchange.value,
-                long_type: longType.value,
-                entry_spread: parseFloat(entrySpread.value),
-                exit_spread: parseFloat(exitSpread.value),
-            };
-
-            const fundingValue = parsePercentValue(liveFunding.textContent);
-            if (Number.isFinite(fundingValue)) {
-                payload.funding_rate = fundingValue;
-            }
-
-            const expectedProfit = payload.entry_spread - payload.exit_spread;
-            if (Number.isFinite(expectedProfit)) {
-                payload.expected_profit = Number(expectedProfit.toFixed(4));
-            }
-
-            const liveEntryValue = parsePercentValue(liveEntrySpread.textContent);
-            const liveExitValue = parsePercentValue(liveExitSpread.textContent);
-            const notes = buildTradeNotes(liveEntryValue, liveExitValue);
-            if (notes) {
-                payload.notes = notes;
-            }
-
-            const originalText = tradeButton.textContent;
-            if (!Number.isFinite(payload.entry_spread) || !Number.isFinite(payload.exit_spread)) {
-                showTradeFeedback('error', '❌ Укажите корректные значения спредов');
-                return;
-            }
-
-            resetTradeFeedback();
-
-            tradeButton.disabled = true;
-            tradeButton.textContent = 'Создание сделки...';
-
-            const userId = tg?.initDataUnsafe?.user?.id;
-            payload.user_id = userId ? String(userId) : 'test_user_123';
-
-            try {
-                const API_URL = 'http://localhost:8000';
-                const response = await fetch(`${API_URL}/api/trades`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const error = await response.json().catch(() => ({}));
-                    throw new Error(error.detail || 'Не удалось создать сделку');
-                }
-
-                const trade = await response.json();
-                let message = '';
-                if (trade.status === 'open') {
-                    message = `✅ Сделка №${trade.id} уже открыта. <a href="deals.html">Перейти к сделкам</a>.`;
-                } else if (trade.status === 'closed') {
-                    message = `ℹ️ Сделка №${trade.id} сразу закрыта. <a href="deals.html">Посмотреть детали</a>.`;
-                } else {
-                    message = `✅ Сделка №${trade.id} создана и ожидает условий. <a href="deals.html">Перейти к сделкам</a>.`;
-                }
-                if (trade.status_detail) {
-                    message += `<br><span style="color:#dc2626;">⚠️ ${escapeHtml(trade.status_detail)}</span>`;
-                }
-                showTradeFeedback('success', message);
-            } catch (error) {
-                console.error('Ошибка создания сделки:', error);
-                showTradeFeedback('error', `❌ ${error.message || 'Произошла ошибка при создании сделки'}`);
-            } finally {
-                tradeButton.disabled = false;
-                tradeButton.textContent = originalText;
-            }
-        }
-
-        function toggleOnlineMode() {
-            isOnline = !isOnline;
-            
-            if (isOnline) {
-                const coin = coinSymbol.value.trim().toUpperCase();
-                if (coin.length >= 1) {
-                    saveUserCoin(coin);
-                }
-                if (startTimeoutId) {
-                    clearTimeout(startTimeoutId);
-                    startTimeoutId = null;
-                }
-                toggleOnline.classList.add('online');
-                statusIndicator.classList.add('online');
-                toggleText.textContent = 'Online спред + фандинг';
-                onlineData.style.display = 'block';
-                autoScroll = true;
-                
-                startTimeoutId = setTimeout(() => {
-                    initChart();
-                    startTimeoutId = null;
-                    if (!isOnline) {
-                        return;
-                    }
-                    startUpdating();
-                }, 100);
-                
-                updateTradeButtonState();
-            } else {
-                if (startTimeoutId) {
-                    clearTimeout(startTimeoutId);
-                    startTimeoutId = null;
-                }
-                toggleOnline.classList.remove('online');
-                statusIndicator.classList.remove('online');
-                toggleText.textContent = 'Online спред + фандинг';
-                onlineData.style.display = 'none';
-                stopUpdating();
-                resetTradeFeedback();
-                
-                if (chart) {
-                    chart.remove();
-                    chart = null;
-                    entrySpreadSeries = null;
-                    exitSpreadSeries = null;
-                    entryLevelLine = null;
-                    exitLevelLine = null;
-                }
-
-                updateTradeButtonState();
-            }
-
-            if (!isRestoringStrategyState) {
-                saveStrategyState();
-            }
-        }
-
-        function resetPositionStatus(element) {
-            if (!element) return;
-            element.style.display = 'none';
-            element.className = 'position-status';
-            element.textContent = '';
-        }
-
-        function resetOnlineState(side = 'both') {
-            if (isOnline) {
-                toggleOnlineMode();
-            }
-
-            if (side === 'both' || side === 'short') {
-                shortCoinAvailable = false;
-                resetPositionStatus(shortPositionStatus);
-                updateChartExchangeStatus('short', shortExchange.value, 'offline');
-            }
-
-            if (side === 'both' || side === 'long') {
-                longCoinAvailable = false;
-                resetPositionStatus(longPositionStatus);
-                updateChartExchangeStatus('long', longExchange.value, 'offline');
-            }
-
-            updateOnlineButton();
-        }
-
-        function initChart() {
-            if (chart) return;
-            
-            if (typeof LightweightCharts === 'undefined') {
-                console.error('TradingView библиотека не загружена');
-                return;
-            }
-            
-            const chartContainer = document.getElementById('spreadChart');
-            
-            try {
-                chart = LightweightCharts.createChart(chartContainer, {
-                    width: chartContainer.clientWidth,
-                    height: 300,
-                    layout: {
-                        background: { color: '#1e293b' },
-                        textColor: '#d1d5db',
-                    },
-                    grid: {
-                        vertLines: { color: '#334155' },
-                        horzLines: { color: '#334155' },
-                    },
-                    timeScale: {
-                        timeVisible: true,
-                        secondsVisible: true,
-                    },
-                    rightPriceScale: {
-                        visible: true,
-                    },
-                    leftPriceScale: {
-                        visible: false,
-                    },
-                    crosshair: {
-                        mode: LightweightCharts.CrosshairMode.Normal,
-                    },
-                });
-                
-                let isUserInteracting = false;
-                
-                chartContainer.addEventListener('mousedown', () => {
-                    isUserInteracting = true;
-                });
-                
-                chartContainer.addEventListener('touchstart', () => {
-                    isUserInteracting = true;
-                });
-                
-                chartContainer.addEventListener('wheel', () => {
-                    isUserInteracting = true;
-                    autoScroll = false;
-                });
-                
-                const handleInteractionEnd = () => {
-                    if (isUserInteracting) {
-                        autoScroll = false;
-                        isUserInteracting = false;
-                    }
-                };
-                
-                chartContainer.addEventListener('mouseup', handleInteractionEnd);
-                chartContainer.addEventListener('touchend', handleInteractionEnd);
-                chartContainer.addEventListener('mouseleave', handleInteractionEnd);
-
-                entrySpreadSeries = chart.addLineSeries({
-                    color: '#10b981',
-                    lineWidth: 1,
-                    title: 'Спред входа',
-                });
-
-                exitSpreadSeries = chart.addLineSeries({
-                    color: '#ef4444',
-                    lineWidth: 1,
-                    title: 'Спред выхода',
-                });
-                
-                updateLevelLines();
-                enableLineDragging();
-                
-                window.addEventListener('resize', () => {
-                    if (chart) {
-                        chart.applyOptions({ 
-                            width: chartContainer.clientWidth 
+                    if (!resp.ok) {
+                        return resp.json().then(function(err) {
+                            throw new Error((err && err.detail) || ('HTTP ' + resp.status));
                         });
                     }
-                });
-                
-                chartContainer.addEventListener('dblclick', () => {
-                    if (chart) {
-                        autoScroll = true;
-                        chart.timeScale().scrollToPosition(50, true);
+                    return resp.json();
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    lastFetchFailed = false;
+
+                    var items = data.items || [];
+
+                    /* Применяем направление сортировки на фронте */
+                    if (sortDir === 'asc') {
+                        items = items.slice().reverse();
                     }
-                });
-                
-                loadHistory();
-            } catch (error) {
-                console.error('Ошибка инициализации графика:', error);
-            }
-        }
 
-        function updateLevelLines() {
-            if (!entrySpreadSeries || !exitSpreadSeries) return;
-            
-            const entryLevel = parseFloat(entrySpread.value) || 1.5;
-            const exitLevel = parseFloat(exitSpread.value) || 0.5;
-            
-            if (entryLevelLine) {
-                entrySpreadSeries.removePriceLine(entryLevelLine);
-            }
-            if (exitLevelLine) {
-                exitSpreadSeries.removePriceLine(exitLevelLine);
-            }
-            
-            entryLevelLine = entrySpreadSeries.createPriceLine({
-                price: entryLevel,
-                color: '#10b981',
-                lineWidth: 1,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: 'Вход ' + entryLevel + '%',
-            });
-            
-            exitLevelLine = exitSpreadSeries.createPriceLine({
-                price: exitLevel,
-                color: '#ef4444',
-                lineWidth: 1,
-                lineStyle: LightweightCharts.LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: 'Выход ' + exitLevel + '%',
-            });
-            
-            entrySpreadSeries.createPriceLine({
-                price: 0,
-                color: '#64748b',
-                lineWidth: 1,
-                lineStyle: LightweightCharts.LineStyle.Solid,
-                axisLabelVisible: false,
-                title: '',
-            });
-        }
-        
-        function enableLineDragging() {
-            if (!chart) return;
-            
-            let isDragging = false;
-            let dragTarget = null;
-            
-            const chartElement = document.getElementById('spreadChart');
-            
-            chartElement.addEventListener('mousedown', (e) => {
-                const rect = chartElement.getBoundingClientRect();
-                const price = entrySpreadSeries.coordinateToPrice(e.clientY - rect.top);
-                
-                if (!price) return;
-                
-                const entryLevel = parseFloat(entrySpread.value) || 1.5;
-                const exitLevel = parseFloat(exitSpread.value) || 0.5;
-                
-                if (Math.abs(price - entryLevel) < 0.1) {
-                    isDragging = true;
-                    dragTarget = 'entry';
-                    e.preventDefault();
-                }
-                else if (Math.abs(price - exitLevel) < 0.1) {
-                    isDragging = true;
-                    dragTarget = 'exit';
-                    e.preventDefault();
-                }
-            });
-            
-            chartElement.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                
-                const rect = chartElement.getBoundingClientRect();
-                const price = entrySpreadSeries.coordinateToPrice(e.clientY - rect.top);
-                
-                if (!price || price < 0) return;
-                
-                if (dragTarget === 'entry') {
-                    entrySpread.value = price.toFixed(2);
-                } else if (dragTarget === 'exit') {
-                    exitSpread.value = price.toFixed(2);
-                }
-                
-                calculateProfit();
-                updateLevelLines();
-            });
-            
-            chartElement.addEventListener('mouseup', () => {
-                isDragging = false;
-                dragTarget = null;
-            });
-            
-            chartElement.addEventListener('mouseleave', () => {
-                isDragging = false;
-                dragTarget = null;
-            });
-        }
+                    /* Обновляем историю */
+                    items.forEach(addToHistory);
 
-        async function loadHistory() {
-            const coin = coinSymbol.value.toUpperCase();
-            const short = shortExchange.value;
-            const long = longExchange.value;
-            const sType = shortType.value;
-            const lType = longType.value;
-            
-            if (!coin || !short || !long) return;
-            
-            const API_URL = 'http://localhost:8000';
-            
-            try {
-                const response = await fetch(
-                    `${API_URL}/api/spread/history?coin=${coin}&short_exchange=${short}&short_type=${sType}&long_exchange=${long}&long_type=${lType}&limit=100`
-                );
-                
-                if (!response.ok) return;
-                
-                const result = await response.json();
-                const history = result.data;
-                
-                if (!history || history.length === 0) return;
-                
-                const entryData = history.map(point => ({
-                    time: point.time,
-                    value: point.entry_spread
-                }));
-                
-                const exitData = history.map(point => ({
-                    time: point.time,
-                    value: point.exit_spread
-                }));
-                
-                entrySpreadSeries.setData(entryData);
-                exitSpreadSeries.setData(exitData);
-                
-            } catch (error) {
-                console.error('Ошибка загрузки истории:', error);
-            }
-        }
+                    /* Обновляем live-badge */
+                    var badgeText = document.getElementById('liveBadgeText');
+                    if (badgeText) {
+                        var prefix = isPaused ? '⏸ LIVE · ' : 'LIVE · ';
+                        badgeText.textContent = prefix + (data.total || 0) + ' пар';
+                    }
 
-        function updateChart(entrySpread, exitSpread) {
-            if (!chart || !entrySpreadSeries || !exitSpreadSeries) return;
-            
-            const timestamp = Math.floor(Date.now() / 1000);
-            
-            entrySpreadSeries.update({
-                time: timestamp,
-                value: entrySpread
-            });
-            
-            exitSpreadSeries.update({
-                time: timestamp,
-                value: exitSpread
-            });
-            
-            if (autoScroll) {
-                try {
-                    chart.timeScale().scrollToPosition(50, false);
-                } catch (error) {
-                    console.error('Ошибка автоскролла:', error);
-                }
-            }
-        }
-
-        function scheduleNextPoll(delay = 500) {
-            if (!isOnline) {
-                isPolling = false;
-                return;
-            }
-            if (pollTimeoutId) {
-                clearTimeout(pollTimeoutId);
-            }
-            pollTimeoutId = setTimeout(async () => {
-                pollTimeoutId = null;
-                if (!isOnline) {
-                    isPolling = false;
-                    return;
-                }
-                try {
-                    await updateLiveData();
-                } finally {
-                    if (isOnline) {
-                        scheduleNextPoll();
+                    if (append) {
+                        /* Дозагрузка: добавляем к уже имеющимся */
+                        lastItems = lastItems.concat(items);
+                        /* Подгрузка при скролле всегда добавляется — isPaused не блокирует */
+                        appendCards(items);
                     } else {
-                        isPolling = false;
+                        lastItems = items;
+                        /* При паузе не перерисовываем — данные накоплены в lastItems */
+                        if (!isPaused) {
+                            renderCards(lastItems);
+                        }
                     }
-                }
-            }, delay);
-        }
 
-        function startUpdating() {
-            if (!isOnline || isPolling) {
-                return;
-            }
-            isPolling = true;
-            scheduleNextPoll(0);
-        }
+                    /* Обновляем offset только для первичной загрузки или дозагрузки */
+                    if (!opts._poll) {
+                        currentOffset = offset + items.length;
+                    }
 
-        function stopUpdating() {
-            if (pollTimeoutId) {
-                clearTimeout(pollTimeoutId);
-                pollTimeoutId = null;
-            }
-            if (activeFetchController) {
-                activeFetchController.abort();
-                activeFetchController = null;
-            }
-            isPolling = false;
-        }
-
-        async function updateLiveData() {
-            if (!isOnline) {
-                return;
-            }
-            const coin = coinSymbol.value.toUpperCase();
-            const short = shortExchange.value;
-            const long = longExchange.value;
-            const sType = shortType.value;
-            const lType = longType.value;
-            
-            if (!coin || !short || !long) {
-                liveEntrySpread.textContent = '--';
-                liveExitSpread.textContent = '--';
-                liveFunding.textContent = '--';
-                return;
-            }
-            
-            const API_URL = 'http://localhost:8000';
-            
-            if (activeFetchController) {
-                activeFetchController.abort();
-            }
-            const controller = new AbortController();
-            activeFetchController = controller;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/spread`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        coin: coin,
-                        short_exchange: short,
-                        short_type: sType,
-                        long_exchange: long,
-                        long_type: lType
-                    }),
-                    signal: controller.signal
+                    /* Обновляем sentinel-наблюдатель */
+                    updateSentinelVisibility(data.total || 0);
+                })
+                .catch(function(err) {
+                    if (err && err.name === 'AbortError') return;
+                    if (!lastFetchFailed) {
+                        lastFetchFailed = true;
+                        var list = document.getElementById('cardsList');
+                        if (!list.querySelector('.stat-card')) {
+                            list.innerHTML = '';
+                            var errEl = document.createElement('div');
+                            errEl.className = 'screener-status';
+                            errEl.textContent = 'Биржи недоступны. Повтор через 4 сек.';
+                            list.appendChild(errEl);
+                        }
+                    }
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+        }
+
+        function fetchDebounced() {
+            if (_debounceTimer) clearTimeout(_debounceTimer);
+            _debounceTimer = setTimeout(function() {
+                currentOffset = 0;
+                lastItems = [];
+                var list = document.getElementById('cardsList');
+                list.innerHTML = '<div class="screener-status"><div class="screener-loader"></div><div>Загрузка данных...</div></div>';
+                fetchSpreads({ limit: PAGE_SIZE, offset: 0 });
+            }, 300);
+        }
+
+        function pollFetch() {
+            /* Polling: обновляет уже загруженные пары (limit = currentOffset, offset = 0) */
+            if (_abortController) {
+                _abortController.abort();
+            }
+            _abortController = new AbortController();
+            var signal = _abortController.signal;
+
+            var loadedCount = Math.min(currentOffset || PAGE_SIZE, 100);
+            var url = API_BASE + '/api/spreads?sort_by=' + encodeURIComponent(currentSortBy)
+                    + '&limit=' + loadedCount + '&offset=0';
+
+            fetch(url, { signal: signal })
+                .then(function(resp) {
+                    if (resp.status === 429) return null;
+                    if (!resp.ok) return null;
+                    return resp.json();
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    lastFetchFailed = false;
+
+                    var items = data.items || [];
+
+                    /* Применяем направление сортировки на фронте */
+                    if (sortDir === 'asc') {
+                        items = items.slice().reverse();
+                    }
+
+                    items.forEach(addToHistory);
+
+                    /* Обновляем badge */
+                    var badgeText = document.getElementById('liveBadgeText');
+                    if (badgeText) {
+                        var prefix = isPaused ? '⏸ LIVE · ' : 'LIVE · ';
+                        badgeText.textContent = prefix + (data.total || 0) + ' пар';
+                    }
+
+                    lastItems = items;
+
+                    if (!isPaused) {
+                        renderCards(lastItems);
+                    }
+                })
+                .catch(function(err) {
+                    if (err && err.name === 'AbortError') return;
+                });
+        }
+
+        /* ── Sentinel (infinite scroll) ──────────────────────────── */
+
+        var _sentinelObserver = null;
+
+        function setupSentinel() {
+            var sentinel = document.getElementById('sentinel');
+            if (!sentinel) return;
+
+            _sentinelObserver = new IntersectionObserver(function(entries) {
+                if (!entries[0].isIntersecting) return;
+                /* Если ещё есть страницы — подгружаем */
+                if (currentOffset < (_totalItems || 0)) {
+                    fetchSpreads({ limit: PAGE_SIZE, offset: currentOffset, append: true });
                 }
-                
-                const data = await response.json();
-                
-                let newShortStatus = 'offline';
-                if (data.short && data.short.bid && data.short.ask && data.short.bid > 0 && data.short.ask > 0) {
-                    newShortStatus = 'online';
-                }
-                
-                let newLongStatus = 'offline';
-                if (data.long && data.long.bid && data.long.ask && data.long.bid > 0 && data.long.ask > 0) {
-                    newLongStatus = 'online';
-                }
-                
-                updateChartExchangeStatus('short', short, newShortStatus);
-                updateChartExchangeStatus('long', long, newLongStatus);
-                
-                liveEntrySpread.textContent = (data.entry_spread != null ? data.entry_spread.toFixed(3) : '--') + '%';
-                liveExitSpread.textContent = (data.exit_spread != null ? data.exit_spread.toFixed(3) : '--') + '%';
-                const fundingPercent = data.funding_diff != null ? data.funding_diff * 100 : null;
-                liveFunding.textContent = fundingPercent !== null 
-                    ? (Math.abs(fundingPercent) < 0.001 ? fundingPercent.toFixed(6) : fundingPercent.toFixed(4)) + '%'
-                    : '--%';                
-                updateChart(data.entry_spread, data.exit_spread);
-                
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Ошибка получения данных:', error);
-                    liveEntrySpread.textContent = 'Ошибка';
-                    liveExitSpread.textContent = 'Ошибка';
-                    liveFunding.textContent = 'Ошибка';
-                    
-                    updateChartExchangeStatus('short', short, 'offline');
-                    updateChartExchangeStatus('long', long, 'offline');
-                }
-            } finally {
-                if (activeFetchController === controller) {
-                    activeFetchController = null;
-                }
+            }, { rootMargin: '100px' });
+
+            _sentinelObserver.observe(sentinel);
+        }
+
+        var _totalItems = 0;
+
+        function updateSentinelVisibility(total) {
+            _totalItems = total;
+        }
+
+        /* ── Pause on scroll (touch + wheel) ────────────────────── */
+
+        var cardsList = document.getElementById('cardsList');
+
+        function activatePause() {
+            isPaused = true;
+            var badgeText = document.getElementById('liveBadgeText');
+            if (badgeText && badgeText.textContent.indexOf('⏸') === -1) {
+                badgeText.textContent = '⏸ ' + badgeText.textContent;
+            }
+            if (_pauseTimer) clearTimeout(_pauseTimer);
+            _pauseTimer = setTimeout(function() {
+                isPaused = false;
+                renderCards(lastItems);
+                var bt = document.getElementById('liveBadgeText');
+                if (bt) bt.textContent = bt.textContent.replace(/^⏸\s*/, '');
+            }, 3000);
+        }
+
+        cardsList.addEventListener('wheel', activatePause, { passive: true });
+        cardsList.addEventListener('touchmove', activatePause, { passive: true });
+
+        /* ── Strategy tabs (сортировка + направление) ────────────── */
+
+        var tabSortMap = {
+            'arb':     'spread_pct',
+            'funding': 'funding',
+            'combo':   'total_yield_pct'
+        };
+
+        function updateTabLabel(btn, isActive) {
+            var base = btn.dataset.label;
+            if (!base) {
+                /* Сохраняем исходный текст однократно */
+                btn.dataset.label = btn.textContent.trim();
+                base = btn.dataset.label;
+            }
+            if (isActive) {
+                btn.textContent = base + ' ' + (sortDir === 'desc' ? '↓' : '↑');
+            } else {
+                btn.textContent = base;
             }
         }
 
-        toggleOnline.addEventListener('click', toggleOnlineMode);
-        coinSymbol.addEventListener('input', () => {
-            resetOnlineState('both');
-            calculateProfit();
-            scheduleShortCheck();
-            scheduleLongCheck();
-        });
-        
-        shortExchange.addEventListener('change', () => {
-            resetOnlineState('short');
-            calculateProfit();
-            scheduleShortCheck();
-        });
-        shortType.addEventListener('change', () => {
-            resetOnlineState('short');
-            calculateProfit();
-            scheduleShortCheck();
-        });
-        longExchange.addEventListener('change', () => {
-            resetOnlineState('long');
-            calculateProfit();
-            scheduleLongCheck();
-        });
-        longType.addEventListener('change', () => {
-            resetOnlineState('long');
-            calculateProfit();
-            scheduleLongCheck();
-        });
-        
-        entrySpread.addEventListener('input', () => {
-            calculateProfit();
-            updateLevelLines();
-        });
-        exitSpread.addEventListener('input', () => {
-            calculateProfit();
-            updateLevelLines();
-        });
+        document.querySelectorAll('#strategyTabs .strat-tab').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var clickedTab = this.dataset.strategy;
+                if (clickedTab === currentTab) {
+                    /* Переключаем направление */
+                    sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+                } else {
+                    /* Новый таб — сбрасываем на desc */
+                    currentTab = clickedTab;
+                    sortDir = 'desc';
+                    currentSortBy = tabSortMap[currentTab] || 'spread_pct';
 
-        if (tradeButton) {
-            tradeButton.addEventListener('click', handleTradeClick);
-        }
+                    document.querySelectorAll('#strategyTabs .strat-tab').forEach(function(b) {
+                        b.classList.remove('strat-active');
+                        updateTabLabel(b, false);
+                    });
+                    this.classList.add('strat-active');
+                }
 
-        restoreStrategyState();
-        calculateProfit();
-
-        if (tg) {
-            tg.MainButton.text = "Сохранить стратегию";
-            tg.MainButton.show();
-            tg.MainButton.onClick(() => {
-                const data = {
-                    coin: coinSymbol.value.toUpperCase(),
-                    shortExchange: shortExchange.value,
-                    shortType: shortType.value,
-                    longExchange: longExchange.value,
-                    longType: longType.value,
-                    entrySpread: parseFloat(entrySpread.value),
-                    exitSpread: parseFloat(exitSpread.value),
-                    expectedProfit: (parseFloat(entrySpread.value) - parseFloat(exitSpread.value)).toFixed(2)
-                };
-                
-                tg.sendData(JSON.stringify(data));
+                updateTabLabel(this, true);
+                haptic('selection');
+                fetchDebounced();
             });
-        }
+        });
+
+        /* Инициализируем метки табов при загрузке */
+        document.querySelectorAll('#strategyTabs .strat-tab').forEach(function(btn) {
+            var isActive = btn.classList.contains('strat-active');
+            if (isActive) {
+                currentTab = btn.dataset.strategy;
+                currentSortBy = tabSortMap[currentTab] || 'spread_pct';
+            }
+            btn.dataset.label = btn.textContent.trim();
+            updateTabLabel(btn, isActive);
+        });
+
+        /* ── Init ────────────────────────────────────────────────── */
+
+        setupSentinel();
+        fetchSpreads({ limit: PAGE_SIZE, offset: 0 });
+        pollIntervalId = setInterval(pollFetch, 4000);
     </script>
 </body>
 </html>

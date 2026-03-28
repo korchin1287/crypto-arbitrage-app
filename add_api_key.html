@@ -2,80 +2,73 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Добавить API ключ</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="common.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* Page-specific: body override */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
+            background: var(--bg-primary);
             padding: 20px;
         }
 
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
+        /* Page-specific: header */
         .header {
             text-align: center;
             margin-bottom: 24px;
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
             margin-bottom: 8px;
         }
 
-        .header p {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #999);
+        @media (min-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
         }
 
+        .header p {
+            font-size: 13px;
+            color: var(--text-hint);
+        }
+
+        @media (min-width: 768px) {
+            .header p {
+                font-size: 14px;
+            }
+        }
+
+        /* Page-specific: form */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .form-group {
+                margin-bottom: 20px;
+            }
         }
 
         label {
             display: block;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            margin-bottom: 8px;
-            color: var(--tg-theme-text-color, #000);
+            margin-bottom: 6px;
+            color: var(--text-primary);
         }
 
-        select, input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid var(--tg-theme-hint-color, #ddd);
-            border-radius: 8px;
-            background-color: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+        @media (min-width: 768px) {
+            label {
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
         }
 
-        select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--tg-theme-button-color, #0088cc);
-        }
-
+        /* Page-specific: checkbox */
         .checkbox-group {
             display: flex;
             align-items: center;
@@ -88,51 +81,38 @@
             cursor: pointer;
         }
 
+        /* Page-specific: info-box */
         .info-box {
             background: rgba(0, 136, 204, 0.1);
-            border-left: 3px solid var(--tg-theme-button-color, #0088cc);
+            border-left: 3px solid var(--color-accent);
             border-radius: 6px;
-            padding: 12px;
-            font-size: 13px;
+            padding: 10px;
+            font-size: 12px;
             line-height: 1.5;
             margin-bottom: 20px;
         }
 
+        @media (min-width: 768px) {
+            .info-box {
+                font-size: 13px;
+                padding: 12px;
+            }
+        }
+
         .info-box strong {
-            color: var(--tg-theme-button-color, #0088cc);
+            color: var(--color-accent);
         }
 
-        .button {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            background-color: var(--tg-theme-button-color, #0088cc);
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .button:active {
-            transform: scale(0.98);
-        }
-
-        .button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
+        /* Page-specific: back-button */
         .back-button {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
             background: transparent;
-            border: 1px solid var(--tg-theme-hint-color, #ddd);
+            border: 1px solid var(--text-hint);
             border-radius: 8px;
-            color: var(--tg-theme-text-color, #000);
+            color: var(--text-primary);
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
@@ -143,122 +123,18 @@
             transform: scale(0.98);
         }
 
-        .error {
-            background: rgba(239, 68, 68, 0.1);
-            border-left: 3px solid #ef4444;
-            border-radius: 6px;
-            padding: 12px;
-            font-size: 14px;
-            color: #ef4444;
-            margin-bottom: 20px;
+        /* Page-specific: state boxes hidden by default */
+        .state-error,
+        .state-success {
             display: none;
         }
 
-        .success {
-            background: rgba(16, 185, 129, 0.1);
-            border-left: 3px solid #10b981;
-            border-radius: 6px;
-            padding: 12px;
-            font-size: 14px;
-            color: #10b981;
-            margin-bottom: 20px;
-            display: none;
-        }
-
+        /* Page-specific: passphrase note */
         .passphrase-note {
             font-size: 12px;
-            color: var(--tg-theme-hint-color, #999);
+            color: var(--text-hint);
             margin-top: 4px;
         }
-/* Мобильная адаптация для add_api_key.html */
-
-.container {
-    padding: 16px 12px;
-}
-
-@media (min-width: 768px) {
-    .container {
-        padding: 20px;
-    }
-}
-
-.header h1 {
-    font-size: 20px;
-}
-
-@media (min-width: 768px) {
-    .header h1 {
-        font-size: 24px;
-    }
-}
-
-.header p {
-    font-size: 13px;
-}
-
-@media (min-width: 768px) {
-    .header p {
-        font-size: 14px;
-    }
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-@media (min-width: 768px) {
-    .form-group {
-        margin-bottom: 20px;
-    }
-}
-
-label {
-    font-size: 13px;
-    margin-bottom: 6px;
-}
-
-@media (min-width: 768px) {
-    label {
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-}
-
-select, input {
-    padding: 11px;
-    font-size: 15px;
-}
-
-@media (min-width: 768px) {
-    select, input {
-        padding: 12px;
-        font-size: 16px;
-    }
-}
-
-.button {
-    padding: 12px;
-    font-size: 15px;
-}
-
-@media (min-width: 768px) {
-    .button {
-        padding: 14px;
-        font-size: 16px;
-    }
-}
-
-.info-box {
-    font-size: 12px;
-    padding: 10px;
-}
-
-@media (min-width: 768px) {
-    .info-box {
-        font-size: 13px;
-        padding: 12px;
-    }
-}
     </style>
 </head>
 <body>
@@ -272,13 +148,13 @@ select, input {
             <p>Добавьте ключи для автоматической торговли</p>
         </div>
 
-        <div class="error" id="errorBox"></div>
-        <div class="success" id="successBox"></div>
+        <div class="state-error" id="errorBox"></div>
+        <div class="state-success" id="successBox"></div>
 
         <form id="apiForm">
             <div class="form-group">
                 <label>Биржа</label>
-                <select id="exchange" required>
+                <select id="exchange" class="select" required>
                     <option value="">Выберите биржу</option>
                     <option value="binance">Binance</option>
                     <option value="bybit">Bybit</option>
@@ -298,17 +174,17 @@ select, input {
 
             <div class="form-group">
                 <label>API Key</label>
-                <input type="text" id="apiKey" placeholder="Введите API ключ" required>
+                <input type="text" id="apiKey" class="input" placeholder="Введите API ключ" required>
             </div>
 
             <div class="form-group">
                 <label>API Secret</label>
-                <input type="password" id="apiSecret" placeholder="Введите API секрет" required>
+                <input type="password" id="apiSecret" class="input" placeholder="Введите API секрет" required>
             </div>
 
             <div class="form-group" id="passphraseGroup" style="display: none;">
                 <label>API Passphrase</label>
-                <input type="password" id="apiPassphrase" placeholder="Введите passphrase">
+                <input type="password" id="apiPassphrase" class="input" placeholder="Введите passphrase">
                 <div class="passphrase-note">Требуется для OKX, KuCoin и Bitget</div>
             </div>
 
@@ -327,8 +203,23 @@ select, input {
                 • Ключи хранятся в зашифрованном виде
             </div>
 
-            <button type="submit" class="button" id="submitBtn">Добавить API ключ</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">Добавить API ключ</button>
         </form>
+    </div>
+
+    <div class="nav-tabs">
+        <a href="index.html" class="nav-tab">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Скринер</span>
+        </a>
+        <a href="deals.html" class="nav-tab">
+            <span class="nav-icon">📑</span>
+            <span class="nav-label">Сделки</span>
+        </a>
+        <a href="account.html" class="nav-tab active">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Аккаунт</span>
+        </a>
     </div>
 
     <script>
