@@ -74,7 +74,7 @@
         /* Row 1: coin name + spread pill */
         .card-top {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             margin-bottom: 7px;
         }
@@ -86,12 +86,26 @@
             line-height: 1;
         }
 
+        .spread-pills {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 3px;
+        }
+
         .spread-pill {
             font-size: 15px;
             font-weight: 700;
             padding: 4px 10px;
             border-radius: 20px;
             line-height: 1;
+        }
+
+        .pill-label {
+            font-size: 11px;
+            font-weight: 500;
+            opacity: 0.6;
+            margin-right: 3px;
         }
 
         .pill-green  { color: var(--color-success); background: rgba(22, 163, 74, 0.12); }
@@ -582,12 +596,32 @@
             coinEl.className = 'card-coin-name';
             coinEl.textContent = item.coin;
 
+            var pillsWrap = document.createElement('div');
+            pillsWrap.className = 'spread-pills';
+
             var pill = document.createElement('span');
             pill.className = 'spread-pill ' + pillCls;
-            pill.textContent = fmtPct(pct);
+            var pillLbl = document.createElement('span');
+            pillLbl.className = 'pill-label';
+            pillLbl.textContent = 'Вход';
+            pill.insertBefore(pillLbl, pill.firstChild);
+            pill.appendChild(document.createTextNode(fmtPct(pct)));
+            pillsWrap.appendChild(pill);
+
+            if (typeof item.exit_spread_pct === 'number') {
+                var exitPct = item.exit_spread_pct;
+                var exitPill = document.createElement('span');
+                exitPill.className = 'spread-pill ' + spreadPillClass(exitPct);
+                var exitLbl = document.createElement('span');
+                exitLbl.className = 'pill-label';
+                exitLbl.textContent = 'Выход';
+                exitPill.appendChild(exitLbl);
+                exitPill.appendChild(document.createTextNode(fmtPct(exitPct)));
+                pillsWrap.appendChild(exitPill);
+            }
 
             top.appendChild(coinEl);
-            top.appendChild(pill);
+            top.appendChild(pillsWrap);
 
             /* Row 2: exchanges */
             var exRow = document.createElement('div');
@@ -884,6 +918,7 @@
             var signal = _abortController.signal;
 
             var url = API_BASE + '/api/spreads?sort_by=' + encodeURIComponent(currentSortBy)
+                    + '&sort_dir=' + encodeURIComponent(sortDir)
                     + '&limit=' + limit + '&offset=' + offset;
 
             fetch(url, { signal: signal })
@@ -903,11 +938,6 @@
                     lastFetchFailed = false;
 
                     var items = data.items || [];
-
-                    /* Применяем направление сортировки на фронте */
-                    if (sortDir === 'asc') {
-                        items = items.slice().reverse();
-                    }
 
                     /* Обновляем историю */
                     items.forEach(addToHistory);
@@ -977,6 +1007,7 @@
 
             var loadedCount = Math.min(currentOffset || PAGE_SIZE, 100);
             var url = API_BASE + '/api/spreads?sort_by=' + encodeURIComponent(currentSortBy)
+                    + '&sort_dir=' + encodeURIComponent(sortDir)
                     + '&limit=' + loadedCount + '&offset=0';
 
             fetch(url, { signal: signal })
@@ -990,11 +1021,6 @@
                     lastFetchFailed = false;
 
                     var items = data.items || [];
-
-                    /* Применяем направление сортировки на фронте */
-                    if (sortDir === 'asc') {
-                        items = items.slice().reverse();
-                    }
 
                     items.forEach(addToHistory);
 
