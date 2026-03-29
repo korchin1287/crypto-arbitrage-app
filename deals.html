@@ -142,11 +142,6 @@
             letter-spacing: 0.6px;
         }
 
-        .status-badge.status-reserved {
-            background: rgba(245, 158, 11, 0.12);
-            color: #b45309;
-        }
-
         .status-badge.status-open {
             background: rgba(34, 197, 94, 0.15);
             color: #047857;
@@ -502,14 +497,22 @@
             tg.ready();
         }
 
+        function haptic(type) {
+            try {
+                if (tg && tg.HapticFeedback) {
+                    if (type === 'selection') tg.HapticFeedback.selectionChanged();
+                    else if (['warning', 'error', 'success'].includes(type)) tg.HapticFeedback.notificationOccurred(type);
+                    else tg.HapticFeedback.impactOccurred(type || 'light');
+                }
+            } catch (e) { /* HapticFeedback not supported */ }
+        }
+
         const API_URL = 'http://localhost:8000';
         const STATUS_LABELS = {
-            reserved: 'Зарезервирована',
             open: 'Открыта',
             closed: 'Закрыта'
         };
         const STATUS_ICONS = {
-            reserved: '⏳',
             open: '🟢',
             closed: '✅'
         };
@@ -1103,14 +1106,14 @@
         }
 
         function buildStatusBadge(status) {
-            const key = status || 'reserved';
+            const key = status || 'open';
             const label = STATUS_LABELS[key] || key;
             const icon = STATUS_ICONS[key] || '';
             return `<span class="status-badge status-${key}">${icon} ${label}</span>`;
         }
 
         function buildTradeCard(trade) {
-            const status = trade.status || 'reserved';
+            const status = trade.status || 'open';
             const entryPercent = formatPercent(trade.entry_spread);
             const exitPercent = formatPercent(trade.exit_spread);
             const expectedPercent = formatPercent(trade.expected_profit);
@@ -1142,7 +1145,7 @@
             const noteText = trade.notes || '';
             const hasLiveNote = typeof noteText === 'string' && /live\s+entry/i.test(noteText);
             const notes = noteText && !hasLiveNote ? `<div class="trade-notes">${escapeHtml(noteText)}</div>` : '';
-            const detailClass = status === 'reserved' ? 'status-detail warning' : 'status-detail info';
+            const detailClass = 'status-detail info';
             const statusDetailIsLive = trade.status_detail && /спред/i.test(trade.status_detail || '');
             const statusDetail = trade.status_detail
                 ? `<div class="${detailClass}${statusDetailIsLive ? ' live-summary' : ''}"${statusDetailIsLive ? ' data-live-summary="true"' : ''}>${escapeHtml(trade.status_detail)}</div>`
@@ -1355,6 +1358,7 @@
         }
 
         async function deleteTrade(tradeId, deleteButton) {
+            haptic('warning');
             const confirmed = confirm(`Удалить сделку №${tradeId}?`);
             if (!confirmed) {
                 return;
@@ -1383,12 +1387,13 @@
         }
 
         if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => loadTrades(true));
+            refreshBtn.addEventListener('click', () => { haptic('light'); loadTrades(true); });
         }
 
         document.addEventListener('click', (event) => {
             const chartBtn = event.target.closest('.btn-toggle-chart');
             if (chartBtn) {
+                haptic('light');
                 const card = chartBtn.closest('.trade-card');
                 if (!card) return;
                 toggleChartForCard(card, chartBtn);
@@ -1397,6 +1402,7 @@
 
             const toggleBtn = event.target.closest('.btn-toggle-edit');
             if (toggleBtn) {
+                haptic('light');
                 const card = toggleBtn.closest('.trade-card');
                 if (!card) return;
                 const form = card.querySelector('.trade-edit-form');

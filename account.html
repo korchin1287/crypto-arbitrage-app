@@ -159,6 +159,17 @@
             font-size: 13px;
             background: rgba(239, 68, 68, 0.1);
             transition: all 0.2s;
+            position: relative;
+        }
+
+        .btn-delete-top::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px;
+            height: 44px;
         }
 
         .btn-delete-top:active {
@@ -197,6 +208,7 @@
             font-size: 13px;
             background: rgba(0, 136, 204, 0.1);
             transition: all 0.2s;
+            position: relative;
             flex-shrink: 0;
         }
 
@@ -215,7 +227,17 @@
         .btn-refresh-inline:hover {
             background: rgba(0, 136, 204, 0.2);
         }
-        
+
+        .btn-refresh-inline::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px;
+            height: 44px;
+        }
+
         .loading-spinner {
             width: 16px;
             height: 16px;
@@ -806,6 +828,16 @@
             tg.ready();
         }
 
+        function haptic(type) {
+            try {
+                if (tg && tg.HapticFeedback) {
+                    if (type === 'selection') tg.HapticFeedback.selectionChanged();
+                    else if (['warning', 'error', 'success'].includes(type)) tg.HapticFeedback.notificationOccurred(type);
+                    else tg.HapticFeedback.impactOccurred(type || 'light');
+                }
+            } catch (e) { /* HapticFeedback not supported */ }
+        }
+
         const API_URL = 'http://localhost:8000';
         
         // Все доступные биржи
@@ -1194,8 +1226,9 @@
             }
         }
 
-        // Обновление баланса (теперь реально работает)
+        // Обновление баланса
         async function refreshBalance(exchange, keyId) {
+            haptic('light');
             const spinner = document.getElementById(`spinner-${keyId}`);
             
             // Показываем спиннер
@@ -1321,6 +1354,7 @@
 
         // Удаление биржи
         async function deleteExchange(keyId, exchange) {
+            haptic('warning');
             const confirmed = confirm(`Удалить API ключ для ${formatExchangeName(exchange)}?`);
             
             if (!confirmed) return;
