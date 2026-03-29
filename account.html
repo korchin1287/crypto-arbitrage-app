@@ -838,6 +838,32 @@
             } catch (e) { /* HapticFeedback not supported */ }
         }
 
+        function formatApiError(errObj, fallback) {
+            if (!errObj) return fallback || 'Неизвестная ошибка';
+            var detail = errObj.detail || fallback || 'Неизвестная ошибка';
+            if (errObj.error) return detail + ' [' + errObj.error + ']';
+            return detail;
+        }
+
+        var pageFeedbackTimer = null;
+        function showFeedback(type, message) {
+            var feedback = document.getElementById('pageFeedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.id = 'pageFeedback';
+                document.body.appendChild(feedback);
+            }
+            feedback.className = 'page-feedback ' + (type === 'error' ? 'error' : 'success');
+            feedback.textContent = message;
+            feedback.style.display = 'block';
+            if (pageFeedbackTimer) {
+                clearTimeout(pageFeedbackTimer);
+            }
+            pageFeedbackTimer = setTimeout(function() {
+                feedback.style.display = 'none';
+            }, 4000);
+        }
+
         const API_URL = 'http://localhost:8000';
         
         // Все доступные биржи
@@ -952,11 +978,11 @@
                 const response = await fetch(`${API_URL}/api/keys/${userId}`);
                 
                 if (!response.ok) {
-                    throw new Error('Ошибка загрузки данных');
+                    const errBody = await response.json().catch(() => ({}));
+                    throw new Error(formatApiError(errBody, 'Ошибка загрузки данных'));
                 }
 
                 const userKeys = await response.json();
-                console.log('Загружены ключи:', userKeys);
 
                 // Создаем Map для быстрого поиска
                 const keysMap = new Map();
@@ -992,12 +1018,11 @@
 
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
-                loadingState.innerHTML = `
-                    <div style="color: #ef4444;">
-                        ❌ Ошибка загрузки данных<br>
-                        <small>${error.message}</small>
-                    </div>
-                `;
+                loadingState.textContent = '';
+                var errDiv = document.createElement('div');
+                errDiv.style.color = 'var(--color-danger)';
+                errDiv.textContent = error.message || 'Ошибка загрузки данных';
+                loadingState.appendChild(errDiv);
             }
         }
         
@@ -1242,17 +1267,17 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Ошибка обновления баланса');
+                    const errBody = await response.json().catch(() => ({}));
+                    throw new Error(formatApiError(errBody, 'Ошибка обновления баланса'));
                 }
 
                 const data = await response.json();
-                
+
                 // Обновляем UI
                 updateBalanceUI(keyId, data);
-                
+
             } catch (error) {
-                console.error('Ошибка обновления баланса:', error);
-                alert('❌ Ошибка обновления баланса: ' + error.message);
+                showFeedback('error', error.message || 'Ошибка обновления баланса');
             } finally {
                 // Скрываем спиннер
                 if (spinner) {
@@ -1299,43 +1324,38 @@
         // Автообновление всех балансов
         async function refreshAllBalances(userKeys) {
             if (!userKeys || !Array.isArray(userKeys) || userKeys.length === 0) {
-                console.log('Нет бирж для обновления');
                 return;
             }
-            
-            console.log('Обновление всех балансов параллельно...');
-            
+
             // Функция обновления одной биржи
             async function refreshSingleExchange(key) {
                 const spinner = document.getElementById(`spinner-${key.id}`);
-                
+
                 try {
                     // Показываем спиннер для этой биржи
                     if (spinner) {
                         spinner.classList.add('active');
                     }
-                    
-                    console.log(`Запрос баланса для ${key.exchange}...`);
-                    
+
                     const response = await fetch(`${API_URL}/api/keys/${key.id}/refresh-balance`, {
                         method: 'POST'
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Ошибка обновления ${key.exchange}`);
+                        const errBody = await response.json().catch(() => ({}));
+                        throw new Error(formatApiError(errBody, 'Ошибка обновления ' + key.exchange));
                     }
 
                     const data = await response.json();
-                    console.log(`✅ ${key.exchange}: обновлено`);
-                    
+
                     // Обновляем UI для этой биржи
                     updateBalanceUI(key.id, {
                         spot_balance: data.spot_balance,
                         futures_balance: data.futures_balance
                     });
-                    
+
                 } catch (error) {
-                    console.error(`❌ Ошибка обновления ${key.exchange}:`, error);
+                    showFeedback('error', error.message);
                 } finally {
                     // Скрываем спиннер для этой биржи
                     if (spinner) {
@@ -1365,14 +1385,15 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Ошибка при удалении');
+                    const errBody = await response.json().catch(() => ({}));
+                    throw new Error(formatApiError(errBody, 'Ошибка при удалении'));
                 }
 
-                alert('✅ API ключ успешно удален');
+                showFeedback('success', 'API ключ успешно удален');
                 loadExchanges(); // Перезагрузка данных
 
             } catch (error) {
-                alert('❌ Ошибка: ' + error.message);
+                showFeedback('error', error.message || 'Ошибка при удалении');
             }
         }
 
@@ -1532,7 +1553,7 @@
         // Открыть модальное окно для ручного ввода
         function openManualBalanceModal(keyId, exchangeName, isOnline) {
             if (isOnline) {
-                alert('⚠️ Биржа онлайн. Используйте автоматическое обновление.');
+                showFeedback('error', 'Биржа онлайн. Используйте автоматическое обновление.');
                 return;
             }
 
@@ -1593,19 +1614,18 @@
                         });
 
                         if (!response.ok) {
-                            const error = await response.json();
-                            throw new Error(error.detail || 'Ошибка сохранения');
+                            const errBody = await response.json().catch(() => ({}));
+                            throw new Error(formatApiError(errBody, 'Ошибка сохранения'));
                         }
 
                         // Закрываем модалку и перезагружаем данные
                         closeManualBalanceModal();
                         await loadExchanges();
 
-                        alert('✅ Баланс успешно обновлен вручную');
+                        showFeedback('success', 'Баланс успешно обновлен вручную');
 
                     } catch (error) {
-                        console.error('Ошибка:', error);
-                        alert('❌ ' + error.message);
+                        showFeedback('error', error.message || 'Ошибка сохранения');
                     }
                 });
             }

@@ -507,6 +507,13 @@
             } catch (e) { /* HapticFeedback not supported */ }
         }
 
+        function formatApiError(errObj, fallback) {
+            if (!errObj) return fallback || 'Неизвестная ошибка';
+            var detail = errObj.detail || fallback || 'Неизвестная ошибка';
+            if (errObj.error) return detail + ' [' + errObj.error + ']';
+            return detail;
+        }
+
         const API_URL = 'http://localhost:8000';
         const STATUS_LABELS = {
             open: 'Открыта',
@@ -1297,6 +1304,7 @@
             isFetchingTrades = true;
 
             loadingState.textContent = 'Загрузка сделок...';
+            loadingState.style.color = '';
             loadingState.style.display = 'block';
             emptyState.style.display = 'none';
             tradesList.innerHTML = '';
@@ -1310,7 +1318,7 @@
                 const response = await fetch(`${API_URL}/api/trades`);
                 if (!response.ok) {
                     const error = await response.json().catch(() => ({}));
-                    throw new Error(error.detail || 'Не удалось загрузить сделки');
+                    throw new Error(formatApiError(error, 'Не удалось загрузить сделки'));
                 }
 
                 const trades = await response.json();
@@ -1319,9 +1327,8 @@
                     showFeedback('success', 'Список сделок обновлен');
                 }
             } catch (error) {
-                console.error('Ошибка загрузки сделок:', error);
-                loadingState.textContent = 'Не удалось загрузить сделки. Проверьте соединение и попробуйте снова.';
-                showFeedback('error', error.message || 'Ошибка загрузки сделок');
+                loadingState.textContent = error.message || 'Не удалось загрузить сделки';
+                loadingState.style.color = 'var(--color-danger)';
             } finally {
                 isFetchingTrades = false;
                 if (refreshBtn) {
@@ -1343,7 +1350,7 @@
 
                 if (!response.ok) {
                     const error = await response.json().catch(() => ({}));
-                    throw new Error(error.detail || 'Не удалось обновить сделку');
+                    throw new Error(formatApiError(error, 'Не удалось обновить сделку'));
                 }
 
                 showFeedback('success', 'Сделка обновлена');
@@ -1373,7 +1380,7 @@
 
                 if (!response.ok) {
                     const error = await response.json().catch(() => ({}));
-                    throw new Error(error.detail || 'Не удалось удалить сделку');
+                    throw new Error(formatApiError(error, 'Не удалось удалить сделку'));
                 }
 
                 showFeedback('success', `Сделка №${tradeId} удалена`);

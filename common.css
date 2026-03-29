@@ -331,7 +331,32 @@ body {
   margin-bottom: 20px;
 }
 
-/* ── 13. Utility Classes ───────────────────────────────────── */
+/* ── 13. Page Feedback (toast notifications) ─────────────── */
+
+.page-feedback {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+  z-index: 9999;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.page-feedback.success {
+  background: rgba(22, 163, 74, 0.12);
+  color: var(--color-success);
+}
+
+.page-feedback.error {
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--color-danger);
+}
+
+/* ── 14. Utility Classes ───────────────────────────────────── */
 
 .text-hint { color: var(--text-hint); }
 .text-secondary { color: var(--text-secondary); }

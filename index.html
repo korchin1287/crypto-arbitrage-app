@@ -512,6 +512,13 @@
             }
         }
 
+        function formatApiError(errObj, fallback) {
+            if (!errObj) return fallback || 'Неизвестная ошибка';
+            var detail = errObj.detail || fallback || 'Неизвестная ошибка';
+            if (errObj.error) return detail + ' [' + errObj.error + ']';
+            return detail;
+        }
+
         /* ── History accumulation ────────────────────────────────── */
 
         function addToHistory(item) {
@@ -928,7 +935,7 @@
                     }
                     if (!resp.ok) {
                         return resp.json().then(function(err) {
-                            throw new Error((err && err.detail) || ('HTTP ' + resp.status));
+                            throw new Error(formatApiError(err, 'HTTP ' + resp.status));
                         });
                     }
                     return resp.json();
@@ -979,7 +986,7 @@
                             list.innerHTML = '';
                             var errEl = document.createElement('div');
                             errEl.className = 'screener-status';
-                            errEl.textContent = 'Биржи недоступны. Повтор через 4 сек.';
+                            errEl.textContent = (err && err.message) || 'Биржи недоступны. Повтор через 4 сек.';
                             list.appendChild(errEl);
                         }
                     }
