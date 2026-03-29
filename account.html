@@ -1389,14 +1389,6 @@
             }
         })();
 
-        // Настройка главной кнопки Telegram
-        if (tg) {
-            tg.MainButton.text = "Добавить биржу";
-            tg.MainButton.show();
-            tg.MainButton.onClick(() => {
-                addExchange();
-            });
-        }
     </script>
 
     <!-- Модальное окно для ручного ввода баланса -->
